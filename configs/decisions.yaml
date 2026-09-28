@@ -1,0 +1,18 @@
+in_dir: out/calibrated
+out_dir: out/decisions
+reserve:
+  cost_ratios: [10, 20, 50, 100]    # c_S / c_R -> tau* = 1 - 1/ratio
+  c_R: 1.0
+  deterministic_grid: [0.0, 0.01, 0.02, 0.03, 0.05, 0.075, 0.1, 0.15, 0.2, 0.3]
+  illustrative_prices: {c_R_usd_per_mwh: 10.0}   # stated, not a market reproduction
+battery:
+  power: 0.5
+  energy: 1.0
+  round_trip_eff: 0.9
+  penalty_mult: 3.0
+  surplus_mult: 0.5
+  price_offpeak: 1.0
+  price_peak: 2.0
+  peak_hours: [16, 17, 18, 19, 20]   # local hour-beginning, i.e. 16:00-21:00
+  levels: [0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.98, 0.99]
+  simul_penalty: 1.0e-6              # tiny cost on charge+discharge to avoid degenerate plans

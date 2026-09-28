@@ -1,0 +1,27 @@
+in_dir: out/forecasts
+out_dir: out/calibrated
+tuned_path: configs/tuned/calibration.yaml
+# Two-sided intervals built from the q10/q90 base at these nominal levels.
+levels: [0.8, 0.9]
+# One-sided bounds for the decision layer (upper for load, lower for solar/wind), built from the
+# nearest native quantile. Reserve uses tau* in {0.9,0.95,0.98,0.99}; battery frontier uses the rest.
+one_sided_levels: [0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.98, 0.99]
+variants: [native, split_cqr, nexcp, aci, pid]
+warmup_start: "2025-01-01"   # first day whose scores enter any calibrator
+split_cqr:
+  window_days: 90
+nexcp:
+  rho: 0.99
+  window_days: null            # null = all past days
+aci:
+  window_days: 90
+  gamma_grid: [0.001, 0.005, 0.01, 0.05]
+pid:
+  window_days: 90              # initial quantile from the first W days
+  eta_grid: [0.001, 0.005, 0.01, 0.05]   # step as a fraction of the warm-up score range
+tune_metric: winkler           # chosen per model x series x level on validation
+clip:
+  load_lower: 0.0
+  gen_lower: 0.0
+  gen_upper: null              # capacity proxy is a trailing max; set 1.0 to clip at it
+ablation_windows: [30, 90, 180]

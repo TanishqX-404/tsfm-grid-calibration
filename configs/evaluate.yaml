@@ -1,0 +1,13 @@
+out_dir: out/metrics
+figures_dir: out/figures
+tables_dir: out/tables
+phase: test                   # metrics are reported on this period
+headline_tau: 0.95
+dm:
+  loss: pinball               # daily mean pinball loss
+  holm: true
+bootstrap:
+  block_days: 7
+  n_resamples: 1000
+  seed: 0
+rolling_coverage_days: 30

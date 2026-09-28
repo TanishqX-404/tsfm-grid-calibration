@@ -1,0 +1,64 @@
+# Model settings. Pin revisions (Hugging Face commit hashes) before the frozen run.
+quantiles: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+horizon: 24
+context_days: 28            # main comparison: 672 hours for every foundation model
+out_dir: out/forecasts
+env_log_dir: out/env
+dry_run_days: 3
+
+covariate_arm: false        # true -> models with covariate support receive weather; set via --covariates
+
+models:
+  seasonal_naive:
+    kind: naive
+    residual_days: 90
+    lag_hours: {load: 168, solar: 24, wind: 24}
+  lgbm:
+    kind: lgbm
+    seeds: [0, 1, 2]
+    lags: [24, 48, 168]
+    n_trials: 30
+    tune_quantiles: [0.1, 0.5, 0.9]   # tune shared hyper-parameters on these (speed); fit all 9
+    tuned_dir: configs/tuned
+    fixed:
+      n_estimators: 600
+      verbose: -1
+  nhits:
+    kind: neural
+    arch: NHITS
+    seeds: [0, 1, 2]
+    max_steps: 1000
+    batch_size: 32
+    learning_rate: 1.0e-3
+    scaler_type: robust
+  patchtst:
+    kind: neural
+    arch: PatchTST
+    seeds: [0, 1, 2]
+    max_steps: 1000
+    batch_size: 32
+    learning_rate: 1.0e-4
+    scaler_type: robust
+  operator:
+    kind: operator
+    targets: [load]
+  chronos2:
+    kind: chronos2
+    checkpoint: amazon/chronos-2
+    revision: main            # TODO pin commit hash
+    batch_size: 64
+  timesfm25:
+    kind: timesfm25
+    checkpoint: google/timesfm-2.5-200m-pytorch
+    revision: main            # TODO pin commit hash
+    batch_size: 64
+  moirai2:
+    kind: moirai2
+    checkpoint: Salesforce/moirai-2.0-R-small
+    revision: main            # TODO pin commit hash
+    batch_size: 64
+  tirex:
+    kind: tirex
+    checkpoint: NX-AI/TiRex
+    revision: main            # TODO pin commit hash
+    batch_size: 64

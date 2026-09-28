@@ -1,0 +1,92 @@
+# Data configuration. All dates are local standard time (no DST), see splits.py.
+paths:
+  raw_dir: data/raw
+  weather_dir: data/weather
+  clean_dir: data/clean
+  report_dir: out/data_report
+
+pudl:
+  base_url: https://s3.us-west-2.amazonaws.com/pudl.catalyst.coop/nightly
+  tables:
+    operations: core_eia930__hourly_operations
+    generation: core_eia930__hourly_net_generation_by_energy_source
+
+# First raw timestamp kept; earlier than the training start so lag features and the
+# trailing-capacity proxy are warm on day one of training.
+raw_start: "2018-10-01"
+raw_end: "2026-09-01"          # exclusive; test period ends 2026-08-31
+
+splits:
+  train: ["2019-07-01", "2024-12-31"]
+  val:   ["2025-01-01", "2025-10-31"]
+  test:  ["2025-11-01", "2026-08-31"]
+
+cleaning:
+  max_interp_gap_hours: 3        # fill NaN runs of <= this many hours linearly
+  capacity_window_days: 90       # trailing-max capacity proxy for solar/wind (EIA-860M not wired)
+  night_elevation_deg: 0.0       # solar hours with elevation below this at every point are night
+  outlier_ratio: 3.0             # drop hourly values > ratio x trailing 7-day median (load only), logged
+
+regions:
+  ERCO:
+    name: ERCOT
+    utc_offset_hours: -6         # CST
+    targets: [load, solar, wind]
+  CISO:
+    name: CAISO
+    utc_offset_hours: -8         # PST
+    targets: [load, solar, wind]
+
+# Weather grid points (lat, lon, weight). Load: population weights (approx., millions).
+# Solar/wind: equal weights over major plant clusters. Approximate; documented in the paper.
+weather:
+  historical_forecast_url: https://historical-forecast-api.open-meteo.com/v1/forecast
+  reanalysis_url: https://archive-api.open-meteo.com/v1/archive
+  # Archived NWP is used from this date on; ERA5 before it (baseline training years).
+  archived_forecast_start: "2022-01-01"
+  variables:
+    load:  [temperature_2m]
+    solar: [shortwave_radiation, cloud_cover]
+    wind:  [wind_speed_100m]
+  points:
+    ERCO:
+      load:
+        - [29.76, -95.37, 7.1]   # Houston
+        - [32.78, -96.80, 5.2]   # Dallas
+        - [32.75, -97.33, 2.4]   # Fort Worth
+        - [29.42, -98.49, 2.6]   # San Antonio
+        - [30.27, -97.74, 2.4]   # Austin
+      solar:
+        - [31.42, -103.49, 1]    # Pecos
+        - [30.89, -102.88, 1]    # Fort Stockton
+        - [31.85, -102.37, 1]    # Odessa
+        - [31.46, -100.44, 1]    # San Angelo
+        - [29.90, -97.90, 1]     # Central TX
+        - [32.40, -99.70, 1]     # Abilene
+      wind:
+        - [32.47, -100.41, 1]    # Sweetwater
+        - [33.58, -101.86, 1]    # Lubbock
+        - [27.80, -97.40, 1]     # Coastal bend
+        - [33.00, -99.70, 1]     # Rolling plains
+        - [31.00, -102.00, 1]    # Permian
+        - [26.90, -97.70, 1]     # South coast
+    CISO:
+      load:
+        - [34.05, -118.24, 13.0] # Los Angeles basin
+        - [37.55, -122.10, 7.7]  # SF Bay Area
+        - [38.58, -121.49, 2.4]  # Sacramento
+        - [36.74, -119.79, 1.0]  # Fresno
+        - [32.72, -117.16, 3.3]  # San Diego
+      solar:
+        - [35.05, -118.17, 1]    # Kern / Mojave
+        - [34.70, -118.30, 1]    # Antelope Valley
+        - [32.85, -115.57, 1]    # Imperial Valley
+        - [33.70, -115.40, 1]    # Desert Center
+        - [36.30, -120.30, 1]    # Westlands
+        - [35.40, -120.00, 1]    # Carrizo / Topaz
+      wind:
+        - [35.10, -118.30, 1]    # Tehachapi
+        - [37.73, -121.65, 1]    # Altamont
+        - [33.92, -116.60, 1]    # San Gorgonio
+        - [38.10, -121.80, 1]    # Solano
+        - [32.60, -116.10, 1]    # East County SD
