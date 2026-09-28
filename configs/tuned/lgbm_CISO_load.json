@@ -1,0 +1,20 @@
+{
+  "params": {
+    "n_estimators": 640,
+    "verbose": -1,
+    "num_leaves": 43,
+    "learning_rate": 0.021871107255050946,
+    "min_child_samples": 44,
+    "colsample_bytree": 0.7502086946149721,
+    "subsample": 0.9461530107243238,
+    "reg_lambda": 0.14848099260524353,
+    "subsample_freq": 1
+  },
+  "val_pinball": 0.010035443259634505,
+  "n_trials": 30,
+  "tune_quantiles": [
+    0.1,
+    0.5,
+    0.9
+  ]
+}

@@ -35,14 +35,14 @@ calibrate:
 	$(PY) -m tgc.calibrate.run
 
 decide:
-	$(PY) -m tgc.decide.run
+	$(PY) -m tgc.decide.run --phase $(PHASE) $(ALLOW)
 
 eval:
-	$(PY) -m tgc.evaluate.run
+	$(PY) -m tgc.evaluate.run --phase $(PHASE) $(ALLOW)
 
 figures:
-	$(PY) -m tgc.plots.figures
-	$(PY) -m tgc.plots.tables
+	$(PY) -m tgc.plots.figures --phase $(PHASE) $(ALLOW)
+	$(PY) -m tgc.plots.tables --phase $(PHASE)
 
 test:
 	$(PY) -m pytest -q

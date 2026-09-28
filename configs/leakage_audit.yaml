@@ -1,0 +1,24 @@
+# T5 leakage audit. Release dates and corpus notes MUST be verified against each model card /
+# paper before submission; entries marked "verify" were not checked when this file was written.
+test_start: "2025-11-01"
+models:
+  chronos2:
+    release: "2025-10-20"
+    source: "arXiv 2510.15821; huggingface.co/amazon/chronos-2"
+    pretraining_notes: "Real + synthetic corpora (Chronos/GIFT-Eval style); list of energy datasets: verify"
+    lists_eia_or_iso_data: verify
+  timesfm25:
+    release: "2025-09 (verify exact date)"
+    source: "huggingface.co/google/timesfm-2.5-200m-pytorch"
+    pretraining_notes: "Google Trends, Wikipedia pageviews, synthetic, public benchmarks: verify"
+    lists_eia_or_iso_data: verify
+  moirai2:
+    release: "2025-08 (verify exact date)"
+    source: "arXiv 2511.11698; huggingface.co/Salesforce/moirai-2.0-R-small"
+    pretraining_notes: "LOTSA-derived corpus (includes energy/grid datasets such as BuildingsBench): verify"
+    lists_eia_or_iso_data: verify
+  tirex:
+    release: "2025-05 (verify exact date)"
+    source: "github.com/NX-AI/tirex"
+    pretraining_notes: "Chronos training corpus + synthetic (per paper): verify"
+    lists_eia_or_iso_data: verify
