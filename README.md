@@ -1,6 +1,6 @@
 # tsfm-grid-calibration
 
-Calibrated foundation-model forecasting for grid decisions: do zero-shot time-series foundation
+Calibrated foundation-model forecasting for grid decision: do zero-shot time-series foundation
 models (Chronos-2, TimesFM-2.5, Moirai-2.0, TiRex) give uncertainty good enough to size reserves and
 schedule storage, and what does a conformal layer buy an operator?
 
