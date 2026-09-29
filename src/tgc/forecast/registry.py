@@ -34,7 +34,7 @@ def build(model: str, series_id: str, seed: int = 0, covariates: bool = False, c
     if kind == "neural":
         from tgc.forecast.neural import NeuralForecaster
         return NeuralForecaster(mc["arch"], seed, ctx, mc["max_steps"], mc["batch_size"],
-                                mc["learning_rate"], mc["scaler_type"], cov)
+                                mc["learning_rate"], mc["scaler_type"], cov, mc.get("extra"))
     fm = dict(checkpoint=mc["checkpoint"], revision=mc["revision"], batch_size=mc["batch_size"],
               context_days=ctx)
     if kind == "chronos2":
