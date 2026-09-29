@@ -25,7 +25,7 @@ def pinball(y, q, tau):
 
 
 def mean_pinball(y, Q):
-    """Average quantile loss over the 0.1..0.9 grid (a CRPS approximation). Q: (n, 9)."""
+    """Average quantile loss over the 0.1..0.9 grid (a CRPS approximations). Q: (n, 9)."""
     return float(np.mean([pinball(y, Q[:, i], t).mean() for i, t in enumerate(QUANTILES)]))
 
 
