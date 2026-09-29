@@ -62,7 +62,8 @@ def _legend(fig, fams, variants):
     from matplotlib.lines import Line2D
     h = [Line2D([], [], ls="", marker="o", c=COLORS[f], label=LABELS.get(f, f)) for f in style.ORDER if f in set(fams)]
     h += [Line2D([], [], ls="", marker=MARKERS[v], c="grey", label=VLABELS.get(v, v)) for v in MARKERS if v in set(variants)]
-    fig.legend(handles=h, loc="lower center", ncol=min(len(h), 8), frameon=False, bbox_to_anchor=(0.5, -0.12))
+    fig.tight_layout()
+    fig.legend(handles=h, loc="upper center", ncol=min(len(h), 6), frameon=False, bbox_to_anchor=(0.5, 0.0))
 
 
 def f3_battery_frontier(bat, out):

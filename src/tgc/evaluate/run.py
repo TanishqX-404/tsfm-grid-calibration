@@ -42,9 +42,12 @@ def mase_denominator(sid):
     """In-sample seasonal-naive MAE on the training period (lag as in the naive baseline)."""
     df = io.load_series(sid)
     tr = splits.get_period("train")
-    y = df.loc[tr.contains(df["local_time"]), "target"].to_numpy()
+    m = tr.contains(df["local_time"]).to_numpy()
+    y = df["target"].to_numpy()
     lag = config.load("models")["models"]["seasonal_naive"]["lag_hours"][config.split_series(sid)[1]]
-    return M.naive_mae(y, lag)
+    d = np.abs(y[lag:] - y[:-lag])
+    keep = m[lag:] & ~df["is_night"].to_numpy()[lag:]  # same hours as the numerator (solar: daytime)
+    return float(np.nanmean(d[keep]))
 
 
 def accuracy(period):
@@ -106,12 +109,14 @@ def calibration(period):
                 d = in_phase(pd.read_parquet(f), "origin_local", period)
                 if sid.endswith("solar"):
                     d = d[~d["is_night"]]
+                # warm-up days without any calibration score yet have no interval
+                d = d[d["lower"].notna() & d["upper"].notna()]
                 for (level, side), g in d.groupby(["level", "side"]):
                     y, lo, up = g["y_true"].to_numpy(), g["lower"].to_numpy(), g["upper"].to_numpy()
                     miss = ((y < lo) | (y > up)).astype(int)
                     cov = 1 - miss.mean()
                     r = {"model": mdir.name, "variant": vdir.name, "series_id": sid, "level": level, "side": side,
-                         "coverage": cov, "gap_pp": 100 * (cov - level),
+                         "n_hours": len(g), "coverage": cov, "gap_pp": 100 * (cov - level),
                          "coverage_unclipped": 1 - ((y < g["lower_raw"]) | (y > g["upper_raw"])).mean(),
                          "kupiec_p": S.kupiec_pof(miss, 1 - level)}
                     # independence on each horizon's daily miss sequence; median p across horizons

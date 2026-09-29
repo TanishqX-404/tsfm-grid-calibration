@@ -1,0 +1,10 @@
+{
+  "operations": {
+    "url": "https://s3.us-west-2.amazonaws.com/pudl.catalyst.coop/nightly/core_eia930__hourly_operations.parquet",
+    "last_modified": "Mon, 28 Sep 2026 08:19:51 GMT"
+  },
+  "generation": {
+    "url": "https://s3.us-west-2.amazonaws.com/pudl.catalyst.coop/nightly/core_eia930__hourly_net_generation_by_energy_source.parquet",
+    "last_modified": "Mon, 28 Sep 2026 08:19:50 GMT"
+  }
+}

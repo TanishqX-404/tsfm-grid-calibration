@@ -27,8 +27,18 @@ def download(force: bool = False) -> None:
         url = f"{cfg['pudl']['base_url']}/{table}.parquet"
         log.info("downloading %s", url)
         tmp = dest.with_suffix(".part")
-        urllib.request.urlretrieve(url, tmp)
+        _, headers = urllib.request.urlretrieve(url, tmp)
         tmp.rename(dest)
+        record_source(key, url, headers.get("Last-Modified"))
+
+
+def record_source(key: str, url: str, last_modified: str | None) -> None:
+    """Keep the PUDL nightly version (Last-Modified) of each raw table for the data report."""
+    import json
+    p = raw_path(key).parent / "_source.json"
+    meta = json.loads(p.read_text()) if p.exists() else {}
+    meta[key] = {"url": url, "last_modified": last_modified}
+    p.write_text(json.dumps(meta, indent=2))
 
 
 def load_region(region: str) -> pd.DataFrame:

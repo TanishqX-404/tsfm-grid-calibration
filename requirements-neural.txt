@@ -1,0 +1,4 @@
+# Deep baselines (separate step: recent neuralforecast releases require a newer torch than Kaggle
+# may ship). Install with:  pip install -r requirements-neural.txt  and check that torch is unchanged;
+# if pip wants to upgrade torch, pin an older neuralforecast (e.g. "neuralforecast<3.1").
+neuralforecast

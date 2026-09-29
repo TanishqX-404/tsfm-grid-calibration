@@ -1,19 +1,17 @@
-# GPU notebooks (Kaggle). Do NOT reinstall torch/numpy: use Kaggle's preinstalled versions.
+# GPU notebooks (Kaggle). Never reinstall torch/numpy: keep Kaggle's preinstalled versions.
+# Exact versions actually used are recorded by tgc.envlog in out/env/*.json.
 # Foundation models
 chronos-forecasting==2.3.2
 timesfm[torch]==3.0.2
 tirex-ts==1.4.2
-# Moirai-2 lives in uni2ts main (installed with --no-deps in the notebook: its torch<2.5 pin
-# conflicts with Kaggle's torch); its runtime deps:
-gluonts~=0.14.3
+# Moirai-2 is installed from uni2ts main with --no-deps (its torch<2.5 pin conflicts with Kaggle);
+# its runtime deps, unpinned so pip keeps the preinstalled torch/numpy:
+gluonts
 jaxtyping
 einops
 hydra-core
 lightning
-# Deep baselines
-neuralforecast==3.2.2
+huggingface_hub
 # Pipeline
 pyarrow
 PyYAML
-lightgbm
-optuna

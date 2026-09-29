@@ -147,7 +147,11 @@ def main(argv=None):
         log.info("wrote %s: %d rows", out_dir / f"{r}.parquet", len(df))
     rdir = config.path(cfg["paths"]["report_dir"])
     rdir.mkdir(parents=True, exist_ok=True)
+    src = config.path(cfg["paths"]["raw_dir"]) / "_source.json"
+    if src.exists():
+        full["_source"] = json.loads(src.read_text())
     (rdir / "build_report.json").write_text(json.dumps(full, indent=2))
+    (out_dir / "_source.json").write_text(json.dumps(full.get("_source", {}), indent=2))
 
 
 if __name__ == "__main__":
