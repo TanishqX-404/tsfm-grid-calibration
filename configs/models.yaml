@@ -45,20 +45,20 @@ models:
   chronos2:
     kind: chronos2
     checkpoint: amazon/chronos-2
-    revision: main            # TODO pin commit hash
+    revision: 29ec3766d36d6f73f0696f85560a422f50e8498c  # pinned 2026-09-29 (Kaggle dry run)
     batch_size: 64
   timesfm25:
     kind: timesfm25
     checkpoint: google/timesfm-2.5-200m-pytorch
-    revision: main            # TODO pin commit hash
+    revision: 1d952420fba87f3c6dee4f240de0f1a0fbc790e3  # pinned 2026-09-29 (Kaggle dry run)
     batch_size: 64
   moirai2:
     kind: moirai2
     checkpoint: Salesforce/moirai-2.0-R-small
-    revision: main            # TODO pin commit hash
+    revision: 30f43ff08c8494f4943ae1521e9d4e94a0fbb389  # pinned 2026-09-29 (Kaggle dry run)
     batch_size: 64
   tirex:
     kind: tirex
     checkpoint: NX-AI/TiRex
-    revision: main            # TODO pin commit hash
+    revision: 63c740922493f5fbe60b277609ec62babfba2762  # pinned 2026-09-29 (Kaggle dry run)
     batch_size: 64
