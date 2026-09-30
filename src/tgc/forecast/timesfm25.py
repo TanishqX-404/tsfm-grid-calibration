@@ -16,7 +16,9 @@ class TimesFM25(BatchedFM):
         torch.set_float32_matmul_precision("high")
         m = timesfm.TimesFM_2p5_200M_torch.from_pretrained(self.checkpoint, revision=self.revision)
         m.compile(timesfm.ForecastConfig(
-            max_context=1024, max_horizon=256, normalize_inputs=True,
+            # at least the requested context (multiple of the 32-step patch), so the 90-day ablation
+            # is not silently truncated
+            max_context=max(1024, -(-self.context_days * 24 // 32) * 32), max_horizon=256, normalize_inputs=True,
             use_continuous_quantile_head=True, fix_quantile_crossing=True,
             per_core_batch_size=self.batch_size, return_backcast=bool(self.covariates)))
         return m

@@ -933,6 +933,567 @@ moirai2:
     two@0.9:
       aci_gamma: 0.001
       pid_eta: 0.01
+nhits-s0:
+  CISO_load:
+    two@0.8:
+      aci_gamma: 0.05
+      pid_eta: 0.05
+    two@0.9:
+      aci_gamma: 0.001
+      pid_eta: 0.05
+    upper@0.5:
+      aci_gamma: 0.05
+      pid_eta: 0.01
+    upper@0.6:
+      aci_gamma: 0.05
+      pid_eta: 0.01
+    upper@0.7:
+      aci_gamma: 0.05
+      pid_eta: 0.01
+    upper@0.8:
+      aci_gamma: 0.001
+      pid_eta: 0.01
+    upper@0.9:
+      aci_gamma: 0.001
+      pid_eta: 0.05
+    upper@0.95:
+      aci_gamma: 0.001
+      pid_eta: 0.05
+    upper@0.98:
+      aci_gamma: 0.001
+      pid_eta: 0.05
+    upper@0.99:
+      aci_gamma: 0.001
+      pid_eta: 0.05
+  CISO_solar:
+    lower@0.5:
+      aci_gamma: 0.05
+      pid_eta: 0.05
+    lower@0.6:
+      aci_gamma: 0.05
+      pid_eta: 0.05
+    lower@0.7:
+      aci_gamma: 0.05
+      pid_eta: 0.05
+    lower@0.8:
+      aci_gamma: 0.05
+      pid_eta: 0.05
+    lower@0.9:
+      aci_gamma: 0.01
+      pid_eta: 0.05
+    lower@0.95:
+      aci_gamma: 0.05
+      pid_eta: 0.05
+    lower@0.98:
+      aci_gamma: 0.05
+      pid_eta: 0.05
+    lower@0.99:
+      aci_gamma: 0.005
+      pid_eta: 0.05
+    two@0.8:
+      aci_gamma: 0.05
+      pid_eta: 0.05
+    two@0.9:
+      aci_gamma: 0.05
+      pid_eta: 0.05
+  CISO_wind:
+    lower@0.5:
+      aci_gamma: 0.001
+      pid_eta: 0.001
+    lower@0.6:
+      aci_gamma: 0.001
+      pid_eta: 0.005
+    lower@0.7:
+      aci_gamma: 0.001
+      pid_eta: 0.01
+    lower@0.8:
+      aci_gamma: 0.01
+      pid_eta: 0.01
+    lower@0.9:
+      aci_gamma: 0.01
+      pid_eta: 0.05
+    lower@0.95:
+      aci_gamma: 0.001
+      pid_eta: 0.05
+    lower@0.98:
+      aci_gamma: 0.001
+      pid_eta: 0.05
+    lower@0.99:
+      aci_gamma: 0.001
+      pid_eta: 0.05
+    two@0.8:
+      aci_gamma: 0.01
+      pid_eta: 0.05
+    two@0.9:
+      aci_gamma: 0.01
+      pid_eta: 0.05
+  ERCO_load:
+    two@0.8:
+      aci_gamma: 0.05
+      pid_eta: 0.05
+    two@0.9:
+      aci_gamma: 0.05
+      pid_eta: 0.05
+    upper@0.5:
+      aci_gamma: 0.01
+      pid_eta: 0.01
+    upper@0.6:
+      aci_gamma: 0.01
+      pid_eta: 0.01
+    upper@0.7:
+      aci_gamma: 0.01
+      pid_eta: 0.01
+    upper@0.8:
+      aci_gamma: 0.05
+      pid_eta: 0.01
+    upper@0.9:
+      aci_gamma: 0.01
+      pid_eta: 0.05
+    upper@0.95:
+      aci_gamma: 0.01
+      pid_eta: 0.05
+    upper@0.98:
+      aci_gamma: 0.01
+      pid_eta: 0.05
+    upper@0.99:
+      aci_gamma: 0.001
+      pid_eta: 0.05
+  ERCO_solar:
+    lower@0.5:
+      aci_gamma: 0.05
+      pid_eta: 0.05
+    lower@0.6:
+      aci_gamma: 0.05
+      pid_eta: 0.05
+    lower@0.7:
+      aci_gamma: 0.05
+      pid_eta: 0.05
+    lower@0.8:
+      aci_gamma: 0.05
+      pid_eta: 0.05
+    lower@0.9:
+      aci_gamma: 0.01
+      pid_eta: 0.05
+    lower@0.95:
+      aci_gamma: 0.001
+      pid_eta: 0.05
+    lower@0.98:
+      aci_gamma: 0.005
+      pid_eta: 0.05
+    lower@0.99:
+      aci_gamma: 0.001
+      pid_eta: 0.05
+    two@0.8:
+      aci_gamma: 0.05
+      pid_eta: 0.05
+    two@0.9:
+      aci_gamma: 0.05
+      pid_eta: 0.05
+  ERCO_wind:
+    lower@0.5:
+      aci_gamma: 0.001
+      pid_eta: 0.001
+    lower@0.6:
+      aci_gamma: 0.001
+      pid_eta: 0.005
+    lower@0.7:
+      aci_gamma: 0.001
+      pid_eta: 0.005
+    lower@0.8:
+      aci_gamma: 0.001
+      pid_eta: 0.005
+    lower@0.9:
+      aci_gamma: 0.001
+      pid_eta: 0.005
+    lower@0.95:
+      aci_gamma: 0.005
+      pid_eta: 0.01
+    lower@0.98:
+      aci_gamma: 0.01
+      pid_eta: 0.05
+    lower@0.99:
+      aci_gamma: 0.001
+      pid_eta: 0.05
+    two@0.8:
+      aci_gamma: 0.001
+      pid_eta: 0.01
+    two@0.9:
+      aci_gamma: 0.005
+      pid_eta: 0.05
+nhits-s1:
+  CISO_load:
+    two@0.8:
+      aci_gamma: 0.001
+      pid_eta: 0.05
+    two@0.9:
+      aci_gamma: 0.001
+      pid_eta: 0.05
+    upper@0.5:
+      aci_gamma: 0.05
+      pid_eta: 0.05
+    upper@0.6:
+      aci_gamma: 0.05
+      pid_eta: 0.01
+    upper@0.7:
+      aci_gamma: 0.05
+      pid_eta: 0.01
+    upper@0.8:
+      aci_gamma: 0.001
+      pid_eta: 0.05
+    upper@0.9:
+      aci_gamma: 0.001
+      pid_eta: 0.05
+    upper@0.95:
+      aci_gamma: 0.001
+      pid_eta: 0.05
+    upper@0.98:
+      aci_gamma: 0.005
+      pid_eta: 0.05
+    upper@0.99:
+      aci_gamma: 0.001
+      pid_eta: 0.05
+  CISO_solar:
+    lower@0.5:
+      aci_gamma: 0.05
+      pid_eta: 0.05
+    lower@0.6:
+      aci_gamma: 0.05
+      pid_eta: 0.01
+    lower@0.7:
+      aci_gamma: 0.05
+      pid_eta: 0.05
+    lower@0.8:
+      aci_gamma: 0.05
+      pid_eta: 0.05
+    lower@0.9:
+      aci_gamma: 0.01
+      pid_eta: 0.05
+    lower@0.95:
+      aci_gamma: 0.05
+      pid_eta: 0.05
+    lower@0.98:
+      aci_gamma: 0.05
+      pid_eta: 0.05
+    lower@0.99:
+      aci_gamma: 0.005
+      pid_eta: 0.05
+    two@0.8:
+      aci_gamma: 0.05
+      pid_eta: 0.05
+    two@0.9:
+      aci_gamma: 0.05
+      pid_eta: 0.05
+  CISO_wind:
+    lower@0.5:
+      aci_gamma: 0.001
+      pid_eta: 0.005
+    lower@0.6:
+      aci_gamma: 0.001
+      pid_eta: 0.005
+    lower@0.7:
+      aci_gamma: 0.01
+      pid_eta: 0.01
+    lower@0.8:
+      aci_gamma: 0.001
+      pid_eta: 0.01
+    lower@0.9:
+      aci_gamma: 0.01
+      pid_eta: 0.05
+    lower@0.95:
+      aci_gamma: 0.001
+      pid_eta: 0.05
+    lower@0.98:
+      aci_gamma: 0.001
+      pid_eta: 0.05
+    lower@0.99:
+      aci_gamma: 0.001
+      pid_eta: 0.05
+    two@0.8:
+      aci_gamma: 0.01
+      pid_eta: 0.05
+    two@0.9:
+      aci_gamma: 0.001
+      pid_eta: 0.05
+  ERCO_load:
+    two@0.8:
+      aci_gamma: 0.05
+      pid_eta: 0.01
+    two@0.9:
+      aci_gamma: 0.001
+      pid_eta: 0.05
+    upper@0.5:
+      aci_gamma: 0.05
+      pid_eta: 0.01
+    upper@0.6:
+      aci_gamma: 0.05
+      pid_eta: 0.01
+    upper@0.7:
+      aci_gamma: 0.05
+      pid_eta: 0.01
+    upper@0.8:
+      aci_gamma: 0.05
+      pid_eta: 0.01
+    upper@0.9:
+      aci_gamma: 0.001
+      pid_eta: 0.01
+    upper@0.95:
+      aci_gamma: 0.005
+      pid_eta: 0.05
+    upper@0.98:
+      aci_gamma: 0.005
+      pid_eta: 0.05
+    upper@0.99:
+      aci_gamma: 0.001
+      pid_eta: 0.05
+  ERCO_solar:
+    lower@0.5:
+      aci_gamma: 0.05
+      pid_eta: 0.01
+    lower@0.6:
+      aci_gamma: 0.01
+      pid_eta: 0.01
+    lower@0.7:
+      aci_gamma: 0.01
+      pid_eta: 0.05
+    lower@0.8:
+      aci_gamma: 0.05
+      pid_eta: 0.05
+    lower@0.9:
+      aci_gamma: 0.01
+      pid_eta: 0.05
+    lower@0.95:
+      aci_gamma: 0.01
+      pid_eta: 0.05
+    lower@0.98:
+      aci_gamma: 0.005
+      pid_eta: 0.05
+    lower@0.99:
+      aci_gamma: 0.001
+      pid_eta: 0.05
+    two@0.8:
+      aci_gamma: 0.05
+      pid_eta: 0.05
+    two@0.9:
+      aci_gamma: 0.05
+      pid_eta: 0.05
+  ERCO_wind:
+    lower@0.5:
+      aci_gamma: 0.001
+      pid_eta: 0.005
+    lower@0.6:
+      aci_gamma: 0.001
+      pid_eta: 0.005
+    lower@0.7:
+      aci_gamma: 0.001
+      pid_eta: 0.005
+    lower@0.8:
+      aci_gamma: 0.001
+      pid_eta: 0.01
+    lower@0.9:
+      aci_gamma: 0.001
+      pid_eta: 0.01
+    lower@0.95:
+      aci_gamma: 0.001
+      pid_eta: 0.01
+    lower@0.98:
+      aci_gamma: 0.01
+      pid_eta: 0.05
+    lower@0.99:
+      aci_gamma: 0.001
+      pid_eta: 0.05
+    two@0.8:
+      aci_gamma: 0.005
+      pid_eta: 0.01
+    two@0.9:
+      aci_gamma: 0.005
+      pid_eta: 0.05
+nhits-s2:
+  CISO_load:
+    two@0.8:
+      aci_gamma: 0.05
+      pid_eta: 0.05
+    two@0.9:
+      aci_gamma: 0.001
+      pid_eta: 0.05
+    upper@0.5:
+      aci_gamma: 0.05
+      pid_eta: 0.01
+    upper@0.6:
+      aci_gamma: 0.05
+      pid_eta: 0.01
+    upper@0.7:
+      aci_gamma: 0.05
+      pid_eta: 0.01
+    upper@0.8:
+      aci_gamma: 0.05
+      pid_eta: 0.05
+    upper@0.9:
+      aci_gamma: 0.001
+      pid_eta: 0.05
+    upper@0.95:
+      aci_gamma: 0.001
+      pid_eta: 0.05
+    upper@0.98:
+      aci_gamma: 0.005
+      pid_eta: 0.05
+    upper@0.99:
+      aci_gamma: 0.001
+      pid_eta: 0.05
+  CISO_solar:
+    lower@0.5:
+      aci_gamma: 0.05
+      pid_eta: 0.05
+    lower@0.6:
+      aci_gamma: 0.05
+      pid_eta: 0.05
+    lower@0.7:
+      aci_gamma: 0.05
+      pid_eta: 0.05
+    lower@0.8:
+      aci_gamma: 0.05
+      pid_eta: 0.05
+    lower@0.9:
+      aci_gamma: 0.05
+      pid_eta: 0.05
+    lower@0.95:
+      aci_gamma: 0.05
+      pid_eta: 0.05
+    lower@0.98:
+      aci_gamma: 0.05
+      pid_eta: 0.05
+    lower@0.99:
+      aci_gamma: 0.005
+      pid_eta: 0.05
+    two@0.8:
+      aci_gamma: 0.05
+      pid_eta: 0.05
+    two@0.9:
+      aci_gamma: 0.05
+      pid_eta: 0.05
+  CISO_wind:
+    lower@0.5:
+      aci_gamma: 0.001
+      pid_eta: 0.005
+    lower@0.6:
+      aci_gamma: 0.001
+      pid_eta: 0.001
+    lower@0.7:
+      aci_gamma: 0.001
+      pid_eta: 0.005
+    lower@0.8:
+      aci_gamma: 0.01
+      pid_eta: 0.01
+    lower@0.9:
+      aci_gamma: 0.01
+      pid_eta: 0.05
+    lower@0.95:
+      aci_gamma: 0.001
+      pid_eta: 0.05
+    lower@0.98:
+      aci_gamma: 0.001
+      pid_eta: 0.05
+    lower@0.99:
+      aci_gamma: 0.001
+      pid_eta: 0.05
+    two@0.8:
+      aci_gamma: 0.01
+      pid_eta: 0.05
+    two@0.9:
+      aci_gamma: 0.01
+      pid_eta: 0.05
+  ERCO_load:
+    two@0.8:
+      aci_gamma: 0.05
+      pid_eta: 0.05
+    two@0.9:
+      aci_gamma: 0.01
+      pid_eta: 0.05
+    upper@0.5:
+      aci_gamma: 0.05
+      pid_eta: 0.01
+    upper@0.6:
+      aci_gamma: 0.05
+      pid_eta: 0.01
+    upper@0.7:
+      aci_gamma: 0.05
+      pid_eta: 0.01
+    upper@0.8:
+      aci_gamma: 0.01
+      pid_eta: 0.01
+    upper@0.9:
+      aci_gamma: 0.01
+      pid_eta: 0.05
+    upper@0.95:
+      aci_gamma: 0.005
+      pid_eta: 0.05
+    upper@0.98:
+      aci_gamma: 0.005
+      pid_eta: 0.05
+    upper@0.99:
+      aci_gamma: 0.001
+      pid_eta: 0.05
+  ERCO_solar:
+    lower@0.5:
+      aci_gamma: 0.05
+      pid_eta: 0.05
+    lower@0.6:
+      aci_gamma: 0.05
+      pid_eta: 0.05
+    lower@0.7:
+      aci_gamma: 0.05
+      pid_eta: 0.05
+    lower@0.8:
+      aci_gamma: 0.01
+      pid_eta: 0.05
+    lower@0.9:
+      aci_gamma: 0.01
+      pid_eta: 0.05
+    lower@0.95:
+      aci_gamma: 0.005
+      pid_eta: 0.05
+    lower@0.98:
+      aci_gamma: 0.005
+      pid_eta: 0.05
+    lower@0.99:
+      aci_gamma: 0.001
+      pid_eta: 0.05
+    two@0.8:
+      aci_gamma: 0.05
+      pid_eta: 0.05
+    two@0.9:
+      aci_gamma: 0.05
+      pid_eta: 0.05
+  ERCO_wind:
+    lower@0.5:
+      aci_gamma: 0.001
+      pid_eta: 0.001
+    lower@0.6:
+      aci_gamma: 0.001
+      pid_eta: 0.001
+    lower@0.7:
+      aci_gamma: 0.001
+      pid_eta: 0.005
+    lower@0.8:
+      aci_gamma: 0.001
+      pid_eta: 0.005
+    lower@0.9:
+      aci_gamma: 0.001
+      pid_eta: 0.01
+    lower@0.95:
+      aci_gamma: 0.001
+      pid_eta: 0.01
+    lower@0.98:
+      aci_gamma: 0.01
+      pid_eta: 0.05
+    lower@0.99:
+      aci_gamma: 0.005
+      pid_eta: 0.05
+    two@0.8:
+      aci_gamma: 0.005
+      pid_eta: 0.01
+    two@0.9:
+      aci_gamma: 0.001
+      pid_eta: 0.05
 operator:
   CISO_load:
     two@0.8:
