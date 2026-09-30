@@ -80,3 +80,18 @@ Output contracts:
   benchmark; ERCOT is clean (~2.5%).
 - **Solar/wind categories.** EIA split solar and wind into with/without integrated storage in 2024;
   the builder sums all variants.
+
+## Study decisions (frozen before the test run)
+
+- **Univariate only.** Weather covariates are out of scope for this paper (Open-Meteo was not
+  reachable from the build environment); the covariate arm and its ablation are future work.
+- **CAISO load kept.** It stays a target; the operator-forecast benchmark is reported for ERCOT only
+  and the CAISO definition mismatch is footnoted.
+- **Context-length ablation** (7 / 28 / 90 days) for the four foundation models, run over validation
+  and test so every calibrator has the same warm-up.
+- **N-HiTS training per target**, chosen on validation: early stopping on the last 90 days of the
+  training period plus dropout for load and wind (without it the single-series model memorizes and
+  its quantiles collapse); plain training for solar. PatchTST unchanged.
+- **Selections on validation only.** ACI gamma / PID eta, LightGBM hyper-parameters, the
+  deterministic reserve share, and, for the decision table, each model's calibration variant and
+  battery interval level are chosen on validation and applied unchanged to test.
