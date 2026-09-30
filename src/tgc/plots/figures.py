@@ -22,17 +22,18 @@ def target_of(sid):
 
 
 def f1_pipeline(out):
-    fig, ax = plt.subplots(figsize=(style.WIDTH, 0.9))
-    stages = ["EIA-930\n+ weather", "Forecasters\n(4 TSFM + baselines)", "Calibration\n(5 variants)",
-              "Decisions\n(reserve, battery)", "Evaluation"]
-    for i, s in enumerate(stages):
-        x = i * 1.0
-        ax.add_patch(plt.Rectangle((x, 0), 0.82, 0.8, fc="#f2f2f2", ec="#333333", lw=0.6))
-        ax.text(x + 0.41, 0.4, s, ha="center", va="center", fontsize=5.5)
+    fig, ax = plt.subplots(figsize=(style.WIDTH, 0.75))
+    stages = ["EIA-930\ndata", "Forecasters\n(4 TSFM +\nbaselines)", "Conformal\ncalibration\n(5 variants)",
+              "Decisions\n(reserve,\nbattery)", "Evaluation"]
+    w, gap = 0.72, 0.14
+    for i, s_ in enumerate(stages):
+        x = i * (w + gap)
+        ax.add_patch(plt.Rectangle((x, 0), w, 1.0, fc="#f2f2f2", ec="#333333", lw=0.6))
+        ax.text(x + w / 2, 0.5, s_, ha="center", va="center", fontsize=5, linespacing=1.1)
         if i < len(stages) - 1:
-            ax.annotate("", xy=(x + 1.0, 0.4), xytext=(x + 0.82, 0.4), arrowprops=dict(arrowstyle="->", lw=0.6))
-    ax.set_xlim(-0.05, len(stages) - 0.1)
-    ax.set_ylim(-0.05, 0.85)
+            ax.annotate("", xy=(x + w + gap, 0.5), xytext=(x + w, 0.5), arrowprops=dict(arrowstyle="->", lw=0.6))
+    ax.set_xlim(-0.02, len(stages) * (w + gap) - gap + 0.02)
+    ax.set_ylim(-0.05, 1.05)
     ax.axis("off")
     style.save(fig, out / "F1_pipeline")
 
@@ -86,14 +87,22 @@ def f3_battery_frontier(bat, out):
 
 def f4_rank_slope(acc, res, out, tau=0.95):
     a = acc[acc["model"].map(primary)].assign(fam=lambda x: x["model"].map(family))
-    r = res[res["model"].map(primary) & np.isclose(res["tau"], tau) & (res["variant"] != "deterministic")]
+    r = res[res["model"].map(primary) & np.isclose(res["tau"], tau) & (res["variant"] != "deterministic")
+            & ~res["variant"].str.contains("_w")]
     if a.empty or r.empty:
         return
-    r = r.assign(fam=r["model"].map(family)).groupby(["fam", "series_id"])["regret"].min().reset_index()
+    # calibration variant per model and series chosen on validation (as in T3); ranked by total cost
+    vp = config.path(config.load("evaluate")["out_dir"]) / "val" / "decisions_reserve.csv"
+    if vp.exists():
+        v = pd.read_csv(vp)
+        v = v[np.isclose(v["tau"], tau) & ~v["variant"].isin(["deterministic"]) & ~v["variant"].str.contains("_w")]
+        sel = v.loc[v.groupby(["model", "series_id"])["regret"].idxmin(), ["model", "series_id", "variant"]]
+        r = sel.merge(r, on=["model", "series_id", "variant"])
+    r = r.assign(fam=r["model"].map(family)).rename(columns={"cost": "score"})[["fam", "series_id", "score"]]
     # only models forecasting every series (the operator covers load only)
     fams = sorted(f for f in set(a["fam"]) & set(r["fam"]) if a[a["fam"] == f]["series_id"].nunique() == a["series_id"].nunique())
     ra = a[a["fam"].isin(fams)].pivot(index="series_id", columns="fam", values="nmae").rank(axis=1).mean()
-    rr = r[r["fam"].isin(fams)].pivot(index="series_id", columns="fam", values="regret").rank(axis=1).mean()
+    rr = r[r["fam"].isin(fams)].pivot(index="series_id", columns="fam", values="score").rank(axis=1).mean()
     fig, ax = plt.subplots(figsize=(style.WIDTH, 2.4))
     for f in fams:
         ax.plot([0, 1], [ra[f], rr[f]], c=COLORS.get(f, "k"), marker="o", ms=3, lw=1)
@@ -101,7 +110,7 @@ def f4_rank_slope(acc, res, out, tau=0.95):
         for f, y in _spread(vals[fams]).items():
             ax.text(x, y, LABELS.get(f, f), ha=ha, va="center", fontsize=6)
     ax.set_xlim(-0.6, 1.6)
-    ax.set_xticks([0, 1], ["Rank by nMAE", f"Rank by regret (tau*={tau})"])
+    ax.set_xticks([0, 1], ["Rank by nMAE", f"Rank by reserve cost ($\\tau^*$={tau})"])
     ax.invert_yaxis()
     ax.set_ylabel("Mean rank across series")
     style.save(fig, out / "F4_rank_slope")

@@ -10,3 +10,8 @@ out/
 *.egg-info/
 .ipynb_checkpoints/
 lightning_logs/
+paper/*.aux
+paper/*.log
+paper/*.bbl
+paper/*.blg
+paper/*.out
