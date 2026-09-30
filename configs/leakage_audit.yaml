@@ -2,27 +2,31 @@
 # (out/env/leakage_check.json, produced by tgc.leakage_check on Kaggle, 2026-09-30).
 # "release" = date the weights file used here was last committed at the pinned revision; later
 # commits in the pinned revisions change README/deployment files only (listed in the JSON).
-# Corpus notes come from the model cards; overlap with EIA-930 / US ISO data must still be checked
-# against the dataset lists (field lists_eia_or_iso_data).
+# Corpus check (2026-09-30) from the dataset builders on GitHub: uni2ts lotsa_v1 (LOTSA / GIFT-Eval
+# Pretrain), gift-eval, chronos-forecasting evaluation configs. No EIA-930 or CAISO series found.
+# LOTSA's energy data: ISO New England load zones and GEFCom (ProEnFo), BuildingsBench (simulated US
+# buildings), Australian electricity, UCI electricity, wind/solar farm series. The Chronos Datasets
+# collection holds an `ercot` load set that Chronos lists among 27 zero-shot datasets "not seen by
+# Chronos models during training"; whether Chronos-2 / TiRex's corpus subsets exclude it is unverified.
 test_start: "2025-11-01"
 models:
   chronos2:
     release: "2025-10-30"
     source: "HF amazon/chronos-2, weights commit 'Add model weights and config'; arXiv 2510.15821"
     pretraining_notes: "Subset of Chronos Datasets (autogluon/chronos_datasets; test parts overlapping GIFT-Eval excluded) + subset of GIFT-Eval Pretrain + synthetic data"
-    lists_eia_or_iso_data: pending
+    lists_eia_or_iso_data: "No EIA-930/CAISO. Possible ERCOT load history (Chronos `ercot`; held out for Chronos v1, unverified for Chronos-2). ISO-NE zones via GIFT-Eval Pretrain."
   timesfm25:
     release: "2025-10-01"
     source: "HF google/timesfm-2.5-200m-pytorch, weights commit 'Refreshed model with speed optimizations.'"
     pretraining_notes: "Model card lists GIFT-Eval Pretrain (see card/paper for the full list)"
-    lists_eia_or_iso_data: pending
+    lists_eia_or_iso_data: "No EIA-930/CAISO/ERCOT on the card; ISO-NE zones via GIFT-Eval Pretrain. Full corpus list beyond the card not verified."
   moirai2:
     release: "2025-08-06"
     source: "HF Salesforce/moirai-2.0-R-small, weights commit 'Push model using huggingface_hub.'; arXiv 2511.11698"
     pretraining_notes: "Subset of GIFT-Eval Pretrain and GIFT-Eval Train (non-leaking historical context), with low-quality series filtered"
-    lists_eia_or_iso_data: pending
+    lists_eia_or_iso_data: "No EIA-930/CAISO/ERCOT; ISO-NE zones via GIFT-Eval Pretrain/LOTSA."
   tirex:
     release: "2025-05-26"
     source: "HF NX-AI/TiRex, weights file model.ckpt from 'init TiRex model repo' (tirex.onnx added 2026-02-05 is not used); arXiv 2505.23719"
     pretraining_notes: "Chronos Datasets + GIFT-Eval Pretrain (+ synthetic, per paper)"
-    lists_eia_or_iso_data: pending
+    lists_eia_or_iso_data: "No EIA-930/CAISO. Possible ERCOT load history via the Chronos corpus (reports zero-shot results on the benchmark containing `ercot`). ISO-NE zones via GIFT-Eval Pretrain."
