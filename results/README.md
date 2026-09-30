@@ -20,3 +20,5 @@ Illustrative dollars (T3 `cost_usd_per_day`) = normalized cost x mean series sca
 reserve price ($10/MWh, `configs/decisions.yaml`); not a reproduction of any market's rules.
 
 Notes: ERCOT test series drop 30 of 304 days (EIA-930 is missing 2025-12-05, which also falls in
+the 28-day context of the next 29 days); the same days are dropped for every model. All four
+foundation models reproduced their test forecasts bit-for-bit in a second, independent Kaggle session.
