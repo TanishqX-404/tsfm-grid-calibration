@@ -184,6 +184,46 @@ def aci_capping(period, level=0.9):
     return pd.DataFrame(rows)
 
 
+FMS = ("chronos2", "moirai2", "timesfm25", "tirex")
+
+
+def context_ablation(period, phase_dir, tau, contexts=(7, 28, 90)):
+    """Foundation models at 7/28/90 days of context, scored on the days every run covers
+    (a longer context drops more days around data gaps). Calibration fixed to ACI."""
+    fc_root = config.path(config.load("models")["out_dir"])
+    cal_root = config.path(config.load("calibration")["out_dir"])
+    base = config.load("models")["context_days"]
+    name = lambda m, c: m if c == base else f"{m}-ctx{c}"
+    rows = []
+    for sid in config.series_ids():
+        runs = {(m, c): load_forecasts(fc_root / name(m, c), sid) for m in FMS for c in contexts}
+        if any(v is None for v in runs.values()):
+            continue
+        runs = {k: v[period.contains(v["origin_local"])] for k, v in runs.items()}
+        common = set.intersection(*(set(v["origin_local"]) for v in runs.values()))
+        night = io.load_series(sid).set_index("local_time")["is_night"]
+        for (m, c), fc in runs.items():
+            fc = fc[fc["origin_local"].isin(common)]
+            fc = fc[~night.reindex(fc["target_local"]).fillna(False).to_numpy()]
+            r = {"model": m, "context_days": c, "series_id": sid, "n_days": len(common),
+                 "nmae": M.nmae(fc["y_true"].to_numpy(), fc["q50"].to_numpy()),
+                 "pinball": M.mean_pinball(fc["y_true"].to_numpy(), fc[list(M.QCOLS)].to_numpy()),
+                 "native80_coverage": M.picp(fc["y_true"].to_numpy(), fc["q10"].to_numpy(), fc["q90"].to_numpy())}
+            cp = cal_root / name(m, c) / "aci" / f"{sid}.parquet"
+            if cp.exists():
+                cal = pd.read_parquet(cp)
+                cal = cal[(cal["side"] == "two") & np.isclose(cal["level"], 0.9) & cal["origin_local"].isin(common)
+                          & ~cal["is_night"]]
+                r["aci90_coverage"] = M.picp(cal["y_true"].to_numpy(), cal["lower"].to_numpy(), cal["upper"].to_numpy())
+                r["aci90_width"] = M.width(cal["lower"].to_numpy(), cal["upper"].to_numpy())
+            d = daily(phase_dir, name(m, c), "aci", sid, tau, period)
+            if d is not None:
+                d = d[d.index.isin(common)]
+                r["reserve_cost_aci"] = float(d["cost"].mean())
+            rows.append(r)
+    return pd.DataFrame(rows)
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--phase", default="val", choices=["val", "test"])
@@ -201,6 +241,7 @@ def main(argv=None):
     imputed_sensitivity(period).round(6).to_csv(out / "imputed_sensitivity.csv", index=False)
     log.info("imputed done")
     aci_capping(period).round(6).to_csv(out / "aci_capping.csv", index=False)
+    context_ablation(period, phase_dir, tau).round(6).to_csv(out / "context_ablation.csv", index=False)
     log.info("wrote %s", out)
 
 

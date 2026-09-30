@@ -217,17 +217,18 @@ def f8_fan(model, period, out, sid="ERCO_wind", variant="split_cqr"):
     style.save(fig, out / "F8_fan")
 
 
-def f9_ablations(acc, cal, out):
+def f9_ablations(acc, cal, out, ctx_tab=None):
     panels = []
     if acc is not None and acc["model"].str.contains("-cov").any():
         panels.append("cov")
-    if acc is not None and acc["model"].str.contains("-ctx").any():
+    if ctx_tab is not None and not ctx_tab.empty:
         panels.append("ctx")
     if cal is not None and cal["variant"].str.contains("_w").any():
         panels.append("win")
     if not panels:
         return
     fig, axes = plt.subplots(1, len(panels), figsize=(style.WIDTH * len(panels) / 1.5, 2.0), squeeze=False)
+    fig.subplots_adjust(wspace=0.45)
     for ax, p in zip(axes[0], panels):
         if p == "cov":
             d = acc.assign(fam=acc["model"].map(family), cov=acc["model"].str.contains("-cov"),
@@ -238,24 +239,31 @@ def f9_ablations(acc, cal, out):
                 ax.plot([0, 1], [r[False], r[True]], c=COLORS.get(f, "k"), marker="o", ms=2, lw=0.7)
             ax.set_xticks([0, 1], ["no weather", "weather"])
             ax.set_ylabel("nMAE")
-        elif p == "ctx":
-            d = acc.assign(fam=acc["model"].map(family))
-            d["ctx"] = d["model"].str.extract(r"-ctx(\d+)")[0].astype(float).fillna(config.load("models")["context_days"])
-            g = d[~d["model"].str.contains("-cov")].groupby(["fam", "ctx"])["nmae"].mean().reset_index()
-            for f, gg in g.groupby("fam"):
-                if gg["ctx"].nunique() > 1:
-                    ax.plot(gg["ctx"], gg["nmae"], c=COLORS.get(f, "k"), marker="o", ms=2, lw=0.7)
+        elif p == "ctx":  # common-day table from evaluate.extra
+            g = ctx_tab.groupby(["model", "context_days"])["nmae"].mean().reset_index()
+            for f, gg in g.groupby("model"):
+                ax.plot(gg["context_days"], gg["nmae"], c=COLORS.get(f, "k"), marker="o", ms=2, lw=0.7,
+                        label=LABELS.get(f, f))
+            ax.set_xscale("log")
+            ax.set_xticks([7, 28, 90], ["7", "28", "90"])
+            ax.minorticks_off()
             ax.set_xlabel("Context (days)")
-            ax.set_ylabel("nMAE")
+            ax.set_ylabel("nMAE (mean over series)")
+            ax.legend(frameon=False, fontsize=5)
         else:
             d = cal[(cal["side"] == "two") & np.isclose(cal["level"], 0.9) & cal["model"].map(primary)]
             d = d.assign(W=d["variant"].str.extract(r"_w(\d+)")[0].astype(float), base=d["variant"].str.replace(r"_w\d+", "", regex=True))
             d.loc[d["W"].isna(), "W"] = config.load("calibration")["split_cqr"]["window_days"]
-            g = d[d["base"] == "split_cqr"].groupby("W")[["coverage", "width"]].mean()
-            ax.plot(g.index, g["coverage"], marker="s", c="k", lw=0.7)
-            ax.axhline(0.9, ls="--", c="k", lw=0.5)
+            # mean coverage is ~nominal for every W; the window matters for hour-of-day coverage
+            # NexCP excluded: its default weights all past days, so it has no W = 90 point
+            for base, mk in (("split_cqr", "s"), ("aci", "^")):
+                g = d[d["base"] == base].groupby("W")["worst_hour_gap_pp"].mean()
+                if len(g) > 1:
+                    ax.plot(g.index, g.values, marker=mk, ms=3, c="k", lw=0.7, label=VLABELS[base])
+            ax.set_xticks([30, 90, 180])
             ax.set_xlabel("Calibration window W (days)")
-            ax.set_ylabel("Split-CQR coverage")
+            ax.set_ylabel("Worst-hour coverage gap (pp)")
+            ax.legend(frameon=False, fontsize=5)
     style.save(fig, out / "F9_ablations")
 
 
@@ -290,7 +298,7 @@ def main(argv=None):
         f6_rolling_coverage(m, period, out, days=ev["rolling_coverage_days"])
         f7_hour_heatmap(None, m, period, out)
         f8_fan(m, period, out)
-    f9_ablations(acc, cal, out)
+    f9_ablations(acc, cal, out, read(mdir / "context_ablation.csv"))
     log.info("figures in %s", out)
 
 

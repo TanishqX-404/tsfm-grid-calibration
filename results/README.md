@@ -13,11 +13,10 @@ Generated from saved outputs with the frozen configuration (commit `1934fc0`, "v
   validation-selected calibration vs its native intervals. Per-series rows in `metrics/{phase}/reserve_diffs.csv`.
 - `metrics/{phase}/seed_spread.csv`, `imputed_sensitivity.csv`, `aci_capping.csv`: seed variability,
   results with/without EIA-imputed hours, and how often ACI's alpha_t fell to <= 0 (interval capped).
-- `figures/{phase}/F1-F8`: paper figures (PDF + PNG).
+- `figures/{phase}/F1-F9`: paper figures (PDF + PNG). F9 = context-length ablation (7/28/90 days, scored on
+  days common to all runs, `metrics/test/context_ablation.csv`) and calibration-window ablation.
 
 Illustrative dollars (T3 `cost_usd_per_day`) = normalized cost x mean series scale (MW) x one stated
 reserve price ($10/MWh, `configs/decisions.yaml`); not a reproduction of any market's rules.
 
 Notes: ERCOT test series drop 30 of 304 days (EIA-930 is missing 2025-12-05, which also falls in
-the 28-day context of the next 29 days); the same days are dropped for every model. The context-length
-ablation (F9) is added once its runs are available.
