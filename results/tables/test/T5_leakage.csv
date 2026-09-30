@@ -1,0 +1,5 @@
+model,release,source,pretraining_notes,lists_eia_or_iso_data,released_before_test
+Chronos-2,2025-10-20,arXiv 2510.15821; huggingface.co/amazon/chronos-2,Real + synthetic corpora (Chronos/GIFT-Eval style); list of energy datasets: verify,verify,True
+TimesFM-2.5,2025-09 (verify exact date),huggingface.co/google/timesfm-2.5-200m-pytorch,"Google Trends, Wikipedia pageviews, synthetic, public benchmarks: verify",verify,True
+Moirai-2.0,2025-08 (verify exact date),arXiv 2511.11698; huggingface.co/Salesforce/moirai-2.0-R-small,LOTSA-derived corpus (includes energy/grid datasets such as BuildingsBench): verify,verify,True
+TiRex,2025-05 (verify exact date),github.com/NX-AI/tirex,Chronos training corpus + synthetic (per paper): verify,verify,True

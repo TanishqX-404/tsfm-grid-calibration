@@ -1,0 +1,51 @@
+model,series_id,nmae,pinball,native80_coverage,nmae_sd_seeds,dm_worse_than_best
+Moirai-2.0,CISO_load,0.0293,0.0116,0.8251,,False
+Chronos-2,CISO_load,0.0297,0.0116,0.7847,,False
+PatchTST,CISO_load,0.0301,0.0121,0.8059,0.0005,True
+TiRex,CISO_load,0.0310,0.0121,0.8300,,False
+LightGBM,CISO_load,0.0311,0.0122,0.7786,0.0000,False
+N-HiTS,CISO_load,0.0350,0.0139,0.7592,0.0020,True
+TimesFM-2.5,CISO_load,0.0368,0.0146,0.7896,,True
+Seasonal naive,CISO_load,0.0659,0.0259,0.7516,,True
+Operator,CISO_load,0.0840,0.0420,0.0032,,True
+LightGBM,CISO_solar,0.0565,0.0227,0.7659,0.0000,False
+Chronos-2,CISO_solar,0.0595,0.0237,0.7642,,False
+Moirai-2.0,CISO_solar,0.0605,0.0241,0.7985,,False
+TiRex,CISO_solar,0.0608,0.0239,0.7772,,False
+TimesFM-2.5,CISO_solar,0.0631,0.0251,0.8064,,True
+Seasonal naive,CISO_solar,0.0651,0.0279,0.7420,,True
+N-HiTS,CISO_solar,0.0712,0.0289,0.8117,0.0009,True
+PatchTST,CISO_solar,0.0845,0.0347,0.8614,0.0010,True
+TiRex,CISO_wind,0.1205,0.0463,0.7943,,False
+Chronos-2,CISO_wind,0.1206,0.0463,0.7908,,False
+Moirai-2.0,CISO_wind,0.1209,0.0467,0.8006,,False
+PatchTST,CISO_wind,0.1219,0.0471,0.7885,0.0006,False
+TimesFM-2.5,CISO_wind,0.1254,0.0486,0.7922,,True
+N-HiTS,CISO_wind,0.1256,0.0496,0.6900,0.0005,True
+LightGBM,CISO_wind,0.1542,0.0588,0.8172,0.0003,True
+Seasonal naive,CISO_wind,0.1795,0.0719,0.7929,,True
+Operator,ERCO_load,0.0286,0.0143,0.0003,,False
+Moirai-2.0,ERCO_load,0.0380,0.0150,0.7924,,False
+Chronos-2,ERCO_load,0.0381,0.0150,0.7331,,False
+TiRex,ERCO_load,0.0381,0.0150,0.8104,,False
+PatchTST,ERCO_load,0.0405,0.0160,0.8207,0.0005,False
+N-HiTS,ERCO_load,0.0426,0.0171,0.7970,0.0005,True
+TimesFM-2.5,ERCO_load,0.0455,0.0179,0.7522,,True
+LightGBM,ERCO_load,0.0495,0.0196,0.7767,0.0001,True
+Seasonal naive,ERCO_load,0.1020,0.0419,0.7633,,True
+LightGBM,ERCO_solar,0.0980,0.0383,0.8406,0.0000,False
+Chronos-2,ERCO_solar,0.1017,0.0397,0.7906,,False
+Moirai-2.0,ERCO_solar,0.1045,0.0409,0.7690,,False
+TimesFM-2.5,ERCO_solar,0.1106,0.0431,0.7482,,True
+Seasonal naive,ERCO_solar,0.1141,0.0459,0.7592,,True
+TiRex,ERCO_solar,0.1156,0.0453,0.7806,,True
+PatchTST,ERCO_solar,0.1184,0.0502,0.8682,0.0001,True
+N-HiTS,ERCO_solar,0.1257,0.0497,0.7708,0.0037,True
+Chronos-2,ERCO_wind,0.1195,0.0457,0.8111,,False
+TiRex,ERCO_wind,0.1218,0.0465,0.8111,,False
+Moirai-2.0,ERCO_wind,0.1229,0.0472,0.8266,,True
+PatchTST,ERCO_wind,0.1236,0.0473,0.8336,0.0005,False
+TimesFM-2.5,ERCO_wind,0.1246,0.0480,0.8150,,True
+N-HiTS,ERCO_wind,0.1279,0.0498,0.7551,0.0032,True
+LightGBM,ERCO_wind,0.1662,0.0626,0.7848,0.0004,True
+Seasonal naive,ERCO_wind,0.1961,0.0777,0.8150,,True

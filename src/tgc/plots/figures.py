@@ -90,19 +90,31 @@ def f4_rank_slope(acc, res, out, tau=0.95):
     if a.empty or r.empty:
         return
     r = r.assign(fam=r["model"].map(family)).groupby(["fam", "series_id"])["regret"].min().reset_index()
-    fams = sorted(set(a["fam"]) & set(r["fam"]))
+    # only models forecasting every series (the operator covers load only)
+    fams = sorted(f for f in set(a["fam"]) & set(r["fam"]) if a[a["fam"] == f]["series_id"].nunique() == a["series_id"].nunique())
     ra = a[a["fam"].isin(fams)].pivot(index="series_id", columns="fam", values="nmae").rank(axis=1).mean()
     rr = r[r["fam"].isin(fams)].pivot(index="series_id", columns="fam", values="regret").rank(axis=1).mean()
     fig, ax = plt.subplots(figsize=(style.WIDTH, 2.4))
     for f in fams:
         ax.plot([0, 1], [ra[f], rr[f]], c=COLORS.get(f, "k"), marker="o", ms=3, lw=1)
-        ax.text(-0.04, ra[f], LABELS.get(f, f), ha="right", va="center", fontsize=6)
-        ax.text(1.04, rr[f], LABELS.get(f, f), ha="left", va="center", fontsize=6)
+    for x, vals, ha in ((-0.04, ra, "right"), (1.04, rr, "left")):
+        for f, y in _spread(vals[fams]).items():
+            ax.text(x, y, LABELS.get(f, f), ha=ha, va="center", fontsize=6)
     ax.set_xlim(-0.6, 1.6)
     ax.set_xticks([0, 1], ["Rank by nMAE", f"Rank by regret (tau*={tau})"])
     ax.invert_yaxis()
     ax.set_ylabel("Mean rank across series")
     style.save(fig, out / "F4_rank_slope")
+
+
+def _spread(vals, gap=0.28):
+    """Label positions: keep order, push apart labels closer than ``gap`` (rank units)."""
+    v = vals.sort_values()
+    out, last = {}, -np.inf
+    for f, y in v.items():
+        y = max(y, last + gap)
+        out[f] = last = y
+    return pd.Series(out)
 
 
 def f5_reliability(rel, out):

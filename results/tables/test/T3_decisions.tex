@@ -1,0 +1,56 @@
+\begin{tabular}{lllrrrrrlrrr}
+\toprule
+model & series_id & variant & regret & regret_ci_lo & regret_ci_hi & shortfall_freq & regret_deterministic & battery_variant & battery_level & pct_oracle & battery_shortfall_freq \\
+\midrule
+Moirai-2.0 & CISO_load & PID & 1.7123 & 1.5562 & 1.8764 & 0.0518 & 2.0217 & NaN & NaN & NaN & NaN \\
+Chronos-2 & CISO_load & Split CQR & 1.7503 & 1.6004 & 1.9319 & 0.0451 & 2.0978 & NaN & NaN & NaN & NaN \\
+TiRex & CISO_load & PID & 1.8595 & 1.6159 & 2.1628 & 0.0543 & 2.1849 & NaN & NaN & NaN & NaN \\
+LightGBM & CISO_load & PID & 1.9497 & 1.7779 & 2.0731 & 0.0589 & 2.3841 & NaN & NaN & NaN & NaN \\
+PatchTST & CISO_load & PID & 2.0477 & 1.8254 & 2.2210 & 0.0532 & 2.2978 & NaN & NaN & NaN & NaN \\
+Operator & CISO_load & PID & 2.0620 & 1.9233 & 2.2190 & 0.0576 & 10.5551 & NaN & NaN & NaN & NaN \\
+TimesFM-2.5 & CISO_load & PID & 2.0886 & 1.9153 & 2.2545 & 0.0513 & 2.5004 & NaN & NaN & NaN & NaN \\
+N-HiTS & CISO_load & PID & 2.2026 & 2.0011 & 2.3831 & 0.0550 & 2.7338 & NaN & NaN & NaN & NaN \\
+Seasonal naive & CISO_load & PID & 3.7951 & 3.3477 & 4.3981 & 0.0554 & 4.4858 & NaN & NaN & NaN & NaN \\
+Chronos-2 & CISO_solar & PID & 2.7696 & 2.4849 & 3.0831 & 0.0526 & 3.2573 & Split CQR & 0.6000 & 90.5354 & 0.0452 \\
+LightGBM & CISO_solar & NexCP & 2.9030 & 2.6212 & 3.2382 & 0.0429 & 3.4578 & Native & 0.6000 & 90.8481 & 0.0417 \\
+Seasonal naive & CISO_solar & PID & 2.9909 & 2.5769 & 3.4510 & 0.0602 & 2.9877 & Native & 0.7000 & 91.6305 & 0.0254 \\
+Moirai-2.0 & CISO_solar & NexCP & 3.1706 & 2.7885 & 3.6497 & 0.0434 & 3.5052 & PID & 0.7000 & 90.9178 & 0.0333 \\
+N-HiTS & CISO_solar & NexCP & 3.1779 & 2.8275 & 3.6305 & 0.0419 & 3.8486 & ACI & 0.6000 & 89.9360 & 0.0481 \\
+PatchTST & CISO_solar & NexCP & 3.1984 & 2.7506 & 3.8604 & 0.0477 & 3.8966 & ACI & 0.7000 & 89.4971 & 0.0360 \\
+TiRex & CISO_solar & Native & 3.2503 & 2.6008 & 4.0893 & 0.0843 & 3.3938 & Native & 0.6000 & 89.9328 & 0.0382 \\
+TimesFM-2.5 & CISO_solar & NexCP & 3.4364 & 3.0470 & 3.9601 & 0.0442 & 3.8012 & Native & 0.7000 & 89.7492 & 0.0391 \\
+TiRex & CISO_wind & PID & 4.4246 & 3.8615 & 5.0964 & 0.0426 & 8.2016 & PID & 0.8000 & 75.6767 & 0.0399 \\
+Chronos-2 & CISO_wind & PID & 4.4759 & 3.9279 & 5.1580 & 0.0496 & 8.3089 & PID & 0.8000 & 75.4606 & 0.0440 \\
+Moirai-2.0 & CISO_wind & PID & 4.6199 & 4.0185 & 5.3148 & 0.0461 & 8.1262 & Native & 0.8000 & 75.1781 & 0.0403 \\
+TimesFM-2.5 & CISO_wind & PID & 4.7784 & 4.1350 & 5.6177 & 0.0465 & 8.4744 & Native & 0.8000 & 74.8130 & 0.0434 \\
+PatchTST & CISO_wind & PID & 5.0121 & 4.4632 & 5.6425 & 0.0473 & 8.9834 & Native & 0.8000 & 74.6801 & 0.0474 \\
+N-HiTS & CISO_wind & PID & 5.1451 & 4.5590 & 5.8116 & 0.0450 & 8.1855 & Native & 0.8000 & 73.2640 & 0.0628 \\
+LightGBM & CISO_wind & Native & 5.3779 & 4.6229 & 6.3483 & 0.0729 & 11.6329 & ACI & 0.8000 & 72.5251 & 0.0485 \\
+Seasonal naive & CISO_wind & ACI & 7.6909 & 6.5395 & 9.0096 & 0.0455 & 13.8747 & NexCP & 0.8000 & 63.6995 & 0.0691 \\
+Operator & ERCO_load & PID & 1.1074 & 0.9559 & 1.3195 & 0.0547 & 1.1530 & NaN & NaN & NaN & NaN \\
+Chronos-2 & ERCO_load & ACI & 1.9912 & 1.6762 & 2.4172 & 0.0538 & 2.6345 & NaN & NaN & NaN & NaN \\
+TiRex & ERCO_load & Split CQR & 2.0705 & 1.7718 & 2.4603 & 0.0432 & 2.6731 & NaN & NaN & NaN & NaN \\
+PatchTST & ERCO_load & Split CQR & 2.2046 & 1.9475 & 2.5459 & 0.0506 & 2.6034 & NaN & NaN & NaN & NaN \\
+Moirai-2.0 & ERCO_load & Native & 2.3473 & 1.9064 & 2.8699 & 0.1197 & 2.5646 & NaN & NaN & NaN & NaN \\
+TimesFM-2.5 & ERCO_load & PID & 2.4245 & 2.1414 & 2.8142 & 0.0516 & 3.2372 & NaN & NaN & NaN & NaN \\
+N-HiTS & ERCO_load & ACI & 2.4876 & 2.2774 & 2.7634 & 0.0420 & 2.6450 & NaN & NaN & NaN & NaN \\
+LightGBM & ERCO_load & Split CQR & 2.7847 & 2.3546 & 3.4223 & 0.0488 & 3.5727 & NaN & NaN & NaN & NaN \\
+Seasonal naive & ERCO_load & PID & 5.6973 & 5.0234 & 6.4608 & 0.0520 & 6.3974 & NaN & NaN & NaN & NaN \\
+Chronos-2 & ERCO_solar & Native & 2.4697 & 2.1856 & 2.8216 & 0.0608 & 3.0841 & Native & 0.7000 & 85.7148 & 0.0351 \\
+Moirai-2.0 & ERCO_solar & ACI & 2.7364 & 2.5446 & 2.9865 & 0.0399 & 3.5673 & ACI & 0.7000 & 87.8372 & 0.0315 \\
+TimesFM-2.5 & ERCO_solar & Split CQR & 2.8209 & 2.5652 & 3.1596 & 0.0399 & 3.8361 & Native & 0.8000 & 86.6416 & 0.0240 \\
+LightGBM & ERCO_solar & Native & 2.8288 & 2.4779 & 3.3169 & 0.0650 & 3.6006 & Native & 0.7000 & 87.6125 & 0.0280 \\
+TiRex & ERCO_solar & NexCP & 2.9237 & 2.6188 & 3.3335 & 0.0331 & 3.6149 & ACI & 0.7000 & 86.8410 & 0.0316 \\
+Seasonal naive & ERCO_solar & ACI & 2.9671 & 2.7214 & 3.2593 & 0.0421 & 3.1178 & ACI & 0.7000 & 86.9786 & 0.0280 \\
+PatchTST & ERCO_solar & ACI & 3.0411 & 2.8664 & 3.2804 & 0.0359 & 4.4807 & PID & 0.7000 & 85.7986 & 0.0371 \\
+N-HiTS & ERCO_solar & ACI & 3.1630 & 2.9340 & 3.4363 & 0.0419 & 4.5522 & PID & 0.7000 & 84.7157 & 0.0386 \\
+TiRex & ERCO_wind & PID & 5.5688 & 5.0143 & 6.1732 & 0.0505 & 10.1082 & Native & 0.8000 & 77.5188 & 0.0541 \\
+Moirai-2.0 & ERCO_wind & PID & 5.6383 & 5.0894 & 6.2064 & 0.0546 & 9.7489 & Native & 0.8000 & 76.9797 & 0.0506 \\
+Chronos-2 & ERCO_wind & PID & 5.6799 & 5.0782 & 6.3056 & 0.0543 & 10.5761 & PID & 0.8000 & 77.7381 & 0.0540 \\
+PatchTST & ERCO_wind & PID & 5.6968 & 5.2306 & 6.1694 & 0.0459 & 11.4360 & Native & 0.8000 & 76.1061 & 0.0567 \\
+TimesFM-2.5 & ERCO_wind & PID & 5.9628 & 5.4872 & 6.3836 & 0.0557 & 10.7838 & Native & 0.8000 & 76.3597 & 0.0619 \\
+N-HiTS & ERCO_wind & PID & 6.4462 & 5.9192 & 6.9040 & 0.0505 & 11.1589 & PID & 0.7000 & 72.5784 & 0.1072 \\
+LightGBM & ERCO_wind & PID & 6.5475 & 6.1445 & 6.9838 & 0.0439 & 15.5267 & Native & 0.8000 & 70.6835 & 0.0683 \\
+Seasonal naive & ERCO_wind & NexCP & 8.2122 & 7.3985 & 8.9848 & 0.0330 & 18.3956 & Native & 0.8000 & 64.3925 & 0.0914 \\
+\bottomrule
+\end{tabular}

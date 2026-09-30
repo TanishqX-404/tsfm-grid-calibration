@@ -1,0 +1,87 @@
+model,series_id,gpu,fit_seconds,predict_seconds,origins,dropped_days,crossing_rows_sorted
+chronos2,CISO_load,Tesla T4,0.014,1.549,304,0,0
+chronos2,CISO_solar,Tesla T4,0.014,1.569,304,0,329
+chronos2,CISO_wind,Tesla T4,0.014,1.586,304,0,5
+chronos2,ERCO_load,Tesla T4,0.016,7.744,304,0,35
+chronos2,ERCO_solar,Tesla T4,0.014,1.63,304,0,585
+chronos2,ERCO_wind,Tesla T4,0.014,1.557,304,0,15
+lgbm-s0,CISO_load,,13.104,5.071,608,0,3663
+lgbm-s0,CISO_solar,,14.555,5.448,608,0,1742
+lgbm-s0,CISO_wind,,2.529,3.58,608,0,20
+lgbm-s0,ERCO_load,,4.361,3.956,578,30,5963
+lgbm-s0,ERCO_solar,,12.714,4.403,578,30,1611
+lgbm-s0,ERCO_wind,,1.809,3.617,578,30,553
+lgbm-s1,CISO_load,,12.92,5.201,608,0,3582
+lgbm-s1,CISO_solar,,14.385,5.207,608,0,1864
+lgbm-s1,CISO_wind,,2.465,3.437,608,0,19
+lgbm-s1,ERCO_load,,3.738,3.917,578,30,6122
+lgbm-s1,ERCO_solar,,12.84,4.5,578,30,1209
+lgbm-s1,ERCO_wind,,1.927,3.621,578,30,508
+lgbm-s2,CISO_load,,13.95,5.068,608,0,3747
+lgbm-s2,CISO_solar,,14.035,5.188,608,0,1811
+lgbm-s2,CISO_wind,,2.454,4.053,608,0,38
+lgbm-s2,ERCO_load,,4.166,4.118,578,30,6581
+lgbm-s2,ERCO_solar,,12.204,4.411,578,30,1126
+lgbm-s2,ERCO_wind,,1.804,3.311,578,30,575
+moirai2,CISO_load,Tesla T4,0.014,0.624,304,0,0
+moirai2,CISO_solar,Tesla T4,0.015,0.615,304,0,316
+moirai2,CISO_wind,Tesla T4,0.015,1.0,304,0,0
+moirai2,ERCO_load,Tesla T4,0.016,3.974,304,0,0
+moirai2,ERCO_solar,Tesla T4,0.015,0.616,304,0,872
+moirai2,ERCO_wind,Tesla T4,0.014,0.63,304,0,1
+nhits-s0,CISO_load,Tesla T4,2.185,1.507,304,0,2522
+nhits-s0,CISO_solar,Tesla T4,28.184,1.511,304,0,4224
+nhits-s0,CISO_wind,Tesla T4,1.823,1.469,304,0,674
+nhits-s0,ERCO_load,Tesla T4,20.442,1.458,304,0,2564
+nhits-s0,ERCO_solar,Tesla T4,28.382,1.462,304,0,3819
+nhits-s0,ERCO_wind,Tesla T4,1.582,1.501,304,0,481
+nhits-s1,CISO_load,Tesla T4,4.919,1.504,304,0,849
+nhits-s1,CISO_solar,Tesla T4,28.47,1.948,304,0,4057
+nhits-s1,CISO_wind,Tesla T4,1.682,1.471,304,0,512
+nhits-s1,ERCO_load,Tesla T4,6.481,1.942,304,0,1660
+nhits-s1,ERCO_solar,Tesla T4,28.24,1.452,304,0,3571
+nhits-s1,ERCO_wind,Tesla T4,2.367,1.461,304,0,469
+nhits-s2,CISO_load,Tesla T4,4.475,1.464,304,0,1036
+nhits-s2,CISO_solar,Tesla T4,28.495,1.928,304,0,4526
+nhits-s2,CISO_wind,Tesla T4,2.252,1.447,304,0,689
+nhits-s2,ERCO_load,Tesla T4,6.354,1.877,304,0,1605
+nhits-s2,ERCO_solar,Tesla T4,28.17,1.457,304,0,3902
+nhits-s2,ERCO_wind,Tesla T4,1.446,1.429,304,0,561
+operator,CISO_load,,0.008,0.381,604,3,0
+operator,ERCO_load,,0.021,0.367,605,3,0
+patchtst-s0,CISO_load,Tesla T4,393.776,4.195,608,0,6814
+patchtst-s0,CISO_solar,Tesla T4,391.526,3.565,608,0,12490
+patchtst-s0,CISO_wind,Tesla T4,392.558,3.659,608,0,4374
+patchtst-s0,ERCO_load,Tesla T4,398.235,4.112,608,0,6520
+patchtst-s0,ERCO_solar,Tesla T4,392.102,3.615,608,0,13278
+patchtst-s0,ERCO_wind,Tesla T4,394.185,3.572,608,0,3644
+patchtst-s1,CISO_load,Tesla T4,391.692,3.392,608,0,6256
+patchtst-s1,CISO_solar,Tesla T4,390.541,3.587,608,0,14440
+patchtst-s1,CISO_wind,Tesla T4,392.401,3.364,608,0,5002
+patchtst-s1,ERCO_load,Tesla T4,399.651,3.897,608,0,6520
+patchtst-s1,ERCO_solar,Tesla T4,393.286,3.949,608,0,13460
+patchtst-s1,ERCO_wind,Tesla T4,391.781,3.443,608,0,4112
+patchtst-s2,CISO_load,Tesla T4,394.027,4.007,608,0,6204
+patchtst-s2,CISO_solar,Tesla T4,390.698,4.111,608,0,13778
+patchtst-s2,CISO_wind,Tesla T4,391.091,3.701,608,0,4994
+patchtst-s2,ERCO_load,Tesla T4,415.885,4.292,608,0,5694
+patchtst-s2,ERCO_solar,Tesla T4,392.591,3.555,608,0,13266
+patchtst-s2,ERCO_wind,Tesla T4,391.662,3.609,608,0,4176
+seasonal_naive,CISO_load,,0.008,1.257,608,0,0
+seasonal_naive,CISO_solar,,0.009,1.268,608,0,0
+seasonal_naive,CISO_wind,,0.008,1.25,608,0,0
+seasonal_naive,ERCO_load,,0.042,1.222,578,30,0
+seasonal_naive,ERCO_solar,,0.016,1.055,578,30,0
+seasonal_naive,ERCO_wind,,0.01,1.165,578,30,0
+timesfm25,CISO_load,Tesla T4,0.014,18.822,304,0,0
+timesfm25,CISO_solar,Tesla T4,0.015,19.061,304,0,0
+timesfm25,CISO_wind,Tesla T4,0.014,17.45,304,0,0
+timesfm25,ERCO_load,Tesla T4,0.016,24.079,304,0,0
+timesfm25,ERCO_solar,Tesla T4,0.014,17.229,304,0,0
+timesfm25,ERCO_wind,Tesla T4,0.014,17.553,304,0,0
+tirex,CISO_load,Tesla T4,0.014,5.361,304,0,0
+tirex,CISO_solar,Tesla T4,0.014,5.277,304,0,2239
+tirex,CISO_wind,Tesla T4,0.014,5.26,304,0,0
+tirex,ERCO_load,Tesla T4,0.017,8.844,304,0,0
+tirex,ERCO_solar,Tesla T4,0.014,5.817,304,0,1800
+tirex,ERCO_wind,Tesla T4,0.014,5.365,304,0,2
