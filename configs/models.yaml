@@ -23,9 +23,10 @@ models:
     fixed:
       n_estimators: 600
       verbose: -1
-  # N-HiTS: early stopping on the last 90 days of the *training* period (val_size hours).
-  # Without it N-HiTS memorizes the single training series and its quantiles collapse
-  # (ERCO_wind validation: 80% coverage 0.16 -> 0.78 with early stopping + dropout).
+  # N-HiTS, chosen per target on validation. Load/wind: early stopping on the last 90 days of the
+  # *training* period (val_size hours) + dropout; without it N-HiTS memorizes the single training
+  # series and its quantiles collapse (80% coverage 0.16-0.47 -> 0.69-0.80). Solar: plain training;
+  # early stopping halts before the diurnal shape is learned (daytime nMAE 0.07-0.13 -> 0.16-0.28).
   nhits:
     kind: neural
     arch: NHITS
@@ -34,12 +35,15 @@ models:
     batch_size: 32
     learning_rate: 1.0e-3
     scaler_type: robust
-    extra:
-      val_size: 2160
-      val_check_steps: 10
-      early_stop_patience_steps: 3
-      dropout_prob_theta: 0.3
-      windows_batch_size: 256
+    extra_by_target:
+      load: &nhits_es
+        val_size: 2160
+        val_check_steps: 10
+        early_stop_patience_steps: 3
+        dropout_prob_theta: 0.3
+        windows_batch_size: 256
+      wind: *nhits_es
+      solar: {}
   patchtst:
     kind: neural
     arch: PatchTST
