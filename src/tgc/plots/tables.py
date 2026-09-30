@@ -76,17 +76,36 @@ def t2_accuracy(acc, dm, out):
     write(d, out, "T2_accuracy")
 
 
-def t3_decisions(res, bat, out, tau):
+def t3_decisions(res, bat, out, tau, res_sel=None, bat_sel=None):
+    """Per model: calibration variant (reserve) and variant + interval level (battery) are
+    *selected on validation* (``res_sel``/``bat_sel``) and reported on the evaluated period, so the
+    test table carries no post-hoc choice. Also writes the full battery table per level."""
     if res is None or res.empty:
         return
-    r = res[res["model"].map(primary) & np.isclose(res["tau"], tau) & ~res["variant"].str.contains("_w")]
-    best = r.loc[r.groupby(["model", "series_id"])["regret"].idxmin()]
-    best = best[["model", "series_id", "variant", "regret", "regret_ci_lo", "regret_ci_hi", "shortfall_freq"]]
+    res_sel = res if res_sel is None else res_sel
+    bat_sel = bat if bat_sel is None else bat_sel
+
+    def pick(df, keys, col, how):
+        idx = df.groupby(keys)[col].idxmin() if how == "min" else df.groupby(keys)[col].idxmax()
+        return df.loc[idx]
+
+    r_sel = res_sel[res_sel["model"].map(primary) & np.isclose(res_sel["tau"], tau)
+                    & ~res_sel["variant"].str.contains("_w") & (res_sel["variant"] != "deterministic")]
+    chosen = pick(r_sel, ["model", "series_id"], "regret", "min")[["model", "series_id", "variant"]]
+    r = res[np.isclose(res["tau"], tau)]
+    best = chosen.merge(r, on=["model", "series_id", "variant"], how="left")
+    det = r[r["variant"] == "deterministic"][["model", "series_id", "regret"]].rename(columns={"regret": "regret_deterministic"})
+    best = best.merge(det, on=["model", "series_id"], how="left")
+    best = best[["model", "series_id", "variant", "regret", "regret_ci_lo", "regret_ci_hi", "shortfall_freq",
+                 "regret_deterministic"]]
     if bat is not None and not bat.empty:
-        b = bat[bat["model"].map(primary)]
-        bb = b.loc[b.groupby(["model", "series_id"])["pct_oracle"].idxmax()][["model", "series_id", "variant", "level", "pct_oracle"]]
-        bb = bb.rename(columns={"variant": "battery_variant", "level": "battery_level"})
+        b_sel = bat_sel[bat_sel["model"].map(primary) & ~bat_sel["variant"].str.contains("_w")]
+        bc = pick(b_sel, ["model", "series_id"], "pct_oracle", "max")[["model", "series_id", "variant", "level"]]
+        bb = bc.merge(bat, on=["model", "series_id", "variant", "level"], how="left")
+        bb = bb[["model", "series_id", "variant", "level", "pct_oracle", "shortfall_freq"]].rename(columns={
+            "variant": "battery_variant", "level": "battery_level", "shortfall_freq": "battery_shortfall_freq"})
         best = best.merge(bb, on=["model", "series_id"], how="left")
+        best["battery_variant"] = best["battery_variant"].map(lambda v: VLABELS.get(v, v) if isinstance(v, str) else v)
     best["model"] = best["model"].map(lambda m: LABELS.get(family(m), m))
     best["variant"] = best["variant"].map(lambda v: VLABELS.get(v, v))
     write(best.sort_values(["series_id", "regret"]), out, "T3_decisions")
@@ -130,7 +149,9 @@ def main(argv=None):
     acc, dm = read(mdir / "accuracy.csv"), read(mdir / "dm_tests.csv")
     if acc is not None:
         t2_accuracy(acc, dm, out)
-    t3_decisions(read(mdir / "decisions_reserve.csv"), read(mdir / "decisions_battery.csv"), out, ev["headline_tau"])
+    vdir = config.path(ev["out_dir"]) / "val"  # selections are always made on validation
+    t3_decisions(read(mdir / "decisions_reserve.csv"), read(mdir / "decisions_battery.csv"), out, ev["headline_tau"],
+                 read(vdir / "decisions_reserve.csv"), read(vdir / "decisions_battery.csv"))
     cal = read(mdir / "calibration.csv")
     if cal is not None:
         t4_calibration(cal, out)
