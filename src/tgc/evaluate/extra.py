@@ -80,8 +80,8 @@ def reserve_diffs(period, phase_dir, tau, bs):
                 rows.append({"comparison": "model", "a": a, "b": b, "series_id": sid, "metric": metric,
                              "n_days": len(diff), "mean_diff": m, "ci_lo": lo, "ci_hi": hi})
                 pooled.append(diff.rename(sid))
-            if pooled:  # mean over series of the daily difference (normalized units, comparable)
-                diff = pd.concat(pooled, axis=1).mean(axis=1)
+            if pooled:  # mean over series of the daily difference, on days every series has (common days)
+                diff = pd.concat(pooled, axis=1).dropna().mean(axis=1)
                 m, lo, hi = paired_ci(diff, bs)
                 rows.append({"comparison": "model", "a": a, "b": b, "series_id": "pooled", "metric": metric,
                              "n_days": len(diff), "mean_diff": m, "ci_lo": lo, "ci_hi": hi})
@@ -103,13 +103,34 @@ def reserve_diffs(period, phase_dir, tau, bs):
                          "series_id": sid, "metric": "cost", "n_days": len(diff), "mean_diff": m, "ci_lo": lo, "ci_hi": hi})
             pooled.append(diff.rename(sid))
         if pooled:
-            diff = pd.concat(pooled, axis=1).mean(axis=1)
+            diff = pd.concat(pooled, axis=1).dropna().mean(axis=1)
             m, lo, hi = paired_ci(diff, bs)
             rows.append({"comparison": "calibrated_vs_native", "a": f"{model}:selected", "b": f"{model}:native",
                          "series_id": "pooled", "metric": "cost", "n_days": len(diff), "mean_diff": m, "ci_lo": lo, "ci_hi": hi})
     out = pd.DataFrame(rows)
     out["significant"] = (out["ci_lo"] > 0) | (out["ci_hi"] < 0)
     return out
+
+
+def pooled_costs(period, phase_dir, tau):
+    """Mean daily reserve cost per model on the days all six series have forecasts (the same
+    days the pooled paired bootstrap uses): validation-selected calibration, native, fixed rule."""
+    sel = selected_variants(tau)
+    sel = sel[sel["model"].map(primary) & (sel["model"] != "operator")]
+    rows = []
+    for model in sorted(sel["model"].unique()):
+        cols = {}
+        for kind in ("selected", "native", "deterministic"):
+            per = []
+            for r in sel[sel["model"] == model].itertuples():
+                v = r.variant if kind == "selected" else kind
+                d = daily(phase_dir, model, v, r.series_id, tau, period)
+                if d is not None:
+                    per.append(d["cost"].rename(r.series_id))
+            cols[kind] = pd.concat(per, axis=1).dropna().mean(axis=1) if per else pd.Series(dtype=float)
+        rows.append({"model": model, "n_days": len(cols["selected"]), "cost_selected": cols["selected"].mean(),
+                     "cost_native": cols["native"].mean(), "cost_deterministic": cols["deterministic"].mean()})
+    return pd.DataFrame(rows)
 
 
 def seed_spread(period, phase_dir, tau):
@@ -237,6 +258,7 @@ def main(argv=None):
     tau = ev["headline_tau"]
     reserve_diffs(period, phase_dir, tau, ev["bootstrap"]).round(6).to_csv(out / "reserve_diffs.csv", index=False)
     log.info("reserve_diffs done")
+    pooled_costs(period, phase_dir, tau).round(6).to_csv(out / "pooled_costs.csv", index=False)
     seed_spread(period, phase_dir, tau).round(6).to_csv(out / "seed_spread.csv", index=False)
     imputed_sensitivity(period).round(6).to_csv(out / "imputed_sensitivity.csv", index=False)
     log.info("imputed done")

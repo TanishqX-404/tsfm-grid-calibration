@@ -1,15 +1,16 @@
-\begin{tabular}{lccccc}
+\begin{tabular}{lcccccccccc}
 \toprule
-Model & Cal. & Native & Fixed & Short. & Battery \\
- & cost & cost & rule & (\%) & (\% orc.) \\
+ & \multicolumn{6}{c}{Reserve cost, validation-selected calibration} & \multicolumn{3}{c}{Mean (common days)} & Battery \\
+\cmidrule(lr){2-7}\cmidrule(lr){8-10}
+Model & ERCOT L & ERCOT S & ERCOT W & CAISO L & CAISO S & CAISO W & Cal. & Native & Fixed & (\% orc.) \\
 \midrule
-Chronos-2 & \textbf{3.98} & 4.23 & 5.78 & 5.3 & 82.4 \\
-TiRex & 4.14 & 4.32 & 5.82 & 5.1 & 82.5 \\
-Moirai-2.0 & 4.15 & 4.49 & 5.70 & 5.9 & \textbf{82.7} \\
-PatchTST & 4.41 & 4.85 & 6.49 & 4.7 & 81.5 \\
-TimesFM-2.5 & 4.43 & 5.01 & 6.29 & 4.8 & 81.9 \\
-N-HiTS & 4.66 & 6.16 & 6.41 & 4.6 & 80.1 \\
-LightGBM & 4.75 & 5.37 & 7.71 & 5.5 & 80.4 \\
-Seasonal naive & 6.48 & 7.69 & 9.46 & 4.8 & 76.7 \\
+Chronos-2 & \underline{\textbf{2.50}} & \underline{\textbf{3.05}} & \underline{7.27} & \underline{2.16} & \underline{\textbf{3.22}} & \underline{5.69} & \underline{\textbf{4.03}} & 4.28 & 5.85 & 82.4 \\
+TiRex & \underline{2.54} & 3.58 & \underline{7.12} & 2.28 & \underline{3.70} & \underline{\textbf{5.61}} & \underline{4.15} & 4.34 & 5.88 & 82.5 \\
+Moirai-2.0 & 2.82 & 3.43 & \underline{\textbf{7.09}} & \underline{\textbf{2.08}} & 3.71 & \underline{5.80} & 4.21 & 4.51 & 5.76 & \textbf{82.7} \\
+PatchTST & 2.75 & 3.79 & \underline{7.44} & 2.53 & 3.69 & 6.27 & 4.47 & 4.89 & 6.55 & 81.5 \\
+TimesFM-2.5 & 3.07 & 3.49 & 7.55 & 2.54 & 3.96 & 5.99 & 4.49 & 5.02 & 6.34 & 81.9 \\
+N-HiTS & 2.96 & 3.88 & 8.07 & 2.98 & 3.81 & 6.28 & 4.73 & 6.20 & 6.47 & 80.1 \\
+LightGBM & 3.69 & 3.47 & 8.57 & 2.44 & \underline{3.43} & 6.90 & 4.84 & 5.46 & 7.85 & 80.4 \\
+Seasonal naive & 6.93 & 3.58 & 10.65 & 4.67 & 3.46 & 9.56 & 6.58 & 7.82 & 9.55 & 76.7 \\
 \bottomrule
 \end{tabular}

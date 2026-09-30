@@ -1,12 +1,19 @@
-\begin{tabular}{lcccccc}
+\begin{tabular}{lccccccc}
 \toprule
-Variant & Cov. & Range & Worst hr & Width & Kup. & Chr. \\
- & & & (pp) & & (\%) & (\%) \\
+Variant & Cov. & Range & Width & IS & Worst & Kup. & Chr. \\
+ & & & & & hr (pp) & (\%) & (\%) \\
 \midrule
-Native & 0.784 & 0.66--0.87 & 21.1 & 0.276 & 0 & 71 \\
-Split CQR & 0.900 & 0.87--0.91 & 5.9 & 0.375 & 71 & 81 \\
-NexCP & 0.906 & 0.89--0.92 & 6.1 & 0.378 & 56 & 85 \\
-ACI & 0.905 & 0.88--0.93 & 5.9 & 0.379 & 65 & 90 \\
-PID & 0.900 & 0.88--0.92 & 7.3 & 0.370 & 60 & 90 \\
+\multicolumn{8}{l}{\emph{Target 80\% (native band $[\hat q_{0.1},\hat q_{0.9}]$ available)}} \\
+Native & 0.784 & 0.66--0.87 & 0.276 & 0.408 & 14.7 & 15 & 71 \\
+Split CQR & 0.801 & 0.75--0.83 & 0.293 & 0.404 & 8.6 & 69 & 71 \\
+NexCP & 0.807 & 0.78--0.83 & 0.293 & 0.402 & 9.3 & 44 & 75 \\
+ACI & 0.804 & 0.77--0.84 & 0.294 & 0.400 & 9.1 & 62 & 83 \\
+PID & 0.802 & 0.78--0.83 & 0.290 & 0.397 & 8.6 & 71 & 90 \\
+\midrule
+\multicolumn{8}{l}{\emph{Target 90\% (no native interval)}} \\
+Split CQR & 0.900 & 0.87--0.91 & 0.375 & 0.482 & 5.9 & 71 & 81 \\
+NexCP & 0.906 & 0.89--0.92 & 0.378 & 0.480 & 6.1 & 56 & 85 \\
+ACI & 0.905 & 0.88--0.93 & 0.379 & 0.478 & 5.9 & 65 & 90 \\
+PID & 0.900 & 0.88--0.92 & 0.370 & 0.475 & 7.3 & 60 & 90 \\
 \bottomrule
 \end{tabular}

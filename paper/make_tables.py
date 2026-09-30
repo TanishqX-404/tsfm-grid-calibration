@@ -85,7 +85,8 @@ def tab_accuracy():
             cells.append(txt)
         if m == "operator":
             lines.append(r"\midrule")
-        lines.append(f"{NAME[m]} & " + " & ".join(cells) + f" & {cov[m]:.2f}" + r" \\")
+        covtxt = "--" if m == "operator" else f"{cov[m]:.2f}"  # a point forecast has no interval
+        lines.append(f"{NAME[m]} & " + " & ".join(cells) + f" & {covtxt}" + r" \\")
     lines += [r"\bottomrule", r"\end{tabular}"]
     (OUT / "tab_accuracy.tex").write_text("\n".join(lines) + "\n")
     # numbers
@@ -109,38 +110,48 @@ def tab_accuracy():
     num("topThreePairsTotal", str(len(pairs)))
     num("nativeCovMinAll", cov[MAIN].min(), "{:.2f}")
     num("nativeCovMaxAll", cov[MAIN].max(), "{:.2f}")
-    sd = pd.read_csv(M / "seed_spread.csv")
-    num("seedSdMax", sd.regret_sd.max(), "{:.2f}")
 
 
 def tab_calibration():
     c = pd.read_csv(M / "calibration.csv")
-    c = c[c.model.isin(MAIN) & (c.side == "two") & np.isclose(c.level, 0.9) & c.variant.isin(VARS)]
-    g = c.groupby("variant").agg(covg=("coverage", "mean"), lo=("coverage", "min"), hi=("coverage", "max"),
-                                 wh=("worst_hour_gap_pp", "mean"), w=("width", "mean"),
-                                 kup=("kupiec_p", lambda p: 100 * (p > 0.05).mean()),
-                                 chr=("christoffersen_p_median", lambda p: 100 * (p > 0.05).mean())).reindex(VARS)
-    lines = [r"\begin{tabular}{lcccccc}", r"\toprule",
-             r"Variant & Cov. & Range & Worst hr & Width & Kup. & Chr. \\",
-             r" & & & (pp) & & (\%) & (\%) \\", r"\midrule"]
-    for v, r in g.iterrows():
-        lines.append(f"{VNAME[v]} & {r.covg:.3f} & {r.lo:.2f}--{r.hi:.2f} & {r.wh:.1f} & {r.w:.3f} & {r.kup:.0f} & {r.chr:.0f}" + r" \\")
+    c = c[c.model.isin(MAIN) & (c.side == "two") & c.variant.isin(VARS)]
+
+    def agg(d):
+        return d.groupby("variant").agg(covg=("coverage", "mean"), lo=("coverage", "min"), hi=("coverage", "max"),
+                                        w=("width", "mean"), wink=("winkler", "mean"), wh=("worst_hour_gap_pp", "mean"),
+                                        kup=("kupiec_p", lambda p: 100 * (p > 0.05).mean()),
+                                        chr=("christoffersen_p_median", lambda p: 100 * (p > 0.05).mean()))
+    g80 = agg(c[np.isclose(c.level, 0.8)]).reindex(VARS)
+    g90 = agg(c[np.isclose(c.level, 0.9) & (c.variant != "native")]).reindex(VARS[1:])
+    lines = [r"\begin{tabular}{lccccccc}", r"\toprule",
+             r"Variant & Cov. & Range & Width & IS & Worst & Kup. & Chr. \\",
+             r" & & & & & hr (pp) & (\%) & (\%) \\", r"\midrule",
+             r"\multicolumn{8}{l}{\emph{Target 80\% (native band $[\hat q_{0.1},\hat q_{0.9}]$ available)}} \\"]
+    for v, r in g80.iterrows():
+        lines.append(f"{VNAME[v]} & {r.covg:.3f} & {r.lo:.2f}--{r.hi:.2f} & {r.w:.3f} & {r.wink:.3f} & {r.wh:.1f} & {r.kup:.0f} & {r.chr:.0f}" + r" \\")
+    lines += [r"\midrule", r"\multicolumn{8}{l}{\emph{Target 90\% (no native interval)}} \\"]
+    for v, r in g90.iterrows():
+        lines.append(f"{VNAME[v]} & {r.covg:.3f} & {r.lo:.2f}--{r.hi:.2f} & {r.w:.3f} & {r.wink:.3f} & {r.wh:.1f} & {r.kup:.0f} & {r.chr:.0f}" + r" \\")
     lines += [r"\bottomrule", r"\end{tabular}"]
     (OUT / "tab_calibration.tex").write_text("\n".join(lines) + "\n")
-    num("nativeCovNinety", g.loc["native", "covg"], "{:.3f}")
-    num("nativeWorstHour", g.loc["native", "wh"], "{:.0f}")
-    num("confWorstHourLo", g.loc[VARS[1:], "wh"].min(), "{:.1f}")
-    num("confWorstHourHi", g.loc[VARS[1:], "wh"].max(), "{:.1f}")
-    num("confCovLo", g.loc[VARS[1:], "lo"].min(), "{:.3f}")
-    num("confCovHi", g.loc[VARS[1:], "hi"].max(), "{:.3f}")
-    num("confKupLo", g.loc[VARS[1:], "kup"].min(), "{:.0f}")
-    num("confKupHi", g.loc[VARS[1:], "kup"].max(), "{:.0f}")
-    num("widthIncreasePct", 100 * (g.loc[VARS[1:], "w"].mean() / g.loc["native", "w"] - 1), "{:.0f}")
-    n80 = pd.read_csv(M / "calibration.csv")
-    n80 = n80[n80.model.isin(MAIN) & (n80.side == "two") & np.isclose(n80.level, 0.8) & (n80.variant == "native")]
-    num("nativeEightyKupPass", 100 * (n80.kupiec_p > 0.05).mean(), "{:.0f}")
+    conf = VARS[1:]
+    num("nativeEightyCov", g80.loc["native", "covg"], "{:.3f}")
+    num("confEightyCovLo", g80.loc[conf, "covg"].min(), "{:.3f}")
+    num("confEightyCovHi", g80.loc[conf, "covg"].max(), "{:.3f}")
+    num("eightyWidthIncreasePct", 100 * (g80.loc[conf, "w"].mean() / g80.loc["native", "w"] - 1), "{:.0f}")
+    num("nativeEightyIS", g80.loc["native", "wink"], "{:.3f}")
+    num("confEightyISLo", g80.loc[conf, "wink"].min(), "{:.3f}")
+    num("confEightyISHi", g80.loc[conf, "wink"].max(), "{:.3f}")
+    num("nativeEightyWorstHour", g80.loc["native", "wh"], "{:.1f}")
+    num("confEightyWorstHourLo", g80.loc[conf, "wh"].min(), "{:.1f}")
+    num("confEightyWorstHourHi", g80.loc[conf, "wh"].max(), "{:.1f}")
+    num("nativeEightyKupPass", g80.loc["native", "kup"], "{:.0f}")
+    num("confNinetyCovLo", g90.covg.min(), "{:.3f}")
+    num("confNinetyCovHi", g90.covg.max(), "{:.3f}")
+    num("confNinetyRangeLo", g90.lo.min(), "{:.2f}")
+    num("confNinetyRangeHi", g90.hi.max(), "{:.2f}")
+    n80 = c[np.isclose(c.level, 0.8) & (c.variant == "native")]
     num("nativeEightyUnder", 100 * (n80.coverage < 0.8).mean(), "{:.0f}")
-    num("nativeEightyWorstHour", n80.worst_hour_gap_pp.mean(), "{:.0f}")
     num("nativeEightyWorstHourMax", n80.worst_hour_gap_pp.max(), "{:.0f}")
     cap = pd.read_csv(M / "aci_capping.csv")
     cap = cap[cap.model.isin(MAIN)]
@@ -148,92 +159,148 @@ def tab_calibration():
     num("aciCapMaxPct", 100 * cap.capped_share.max(), "{:.1f}")
     imp = pd.read_csv(M / "imputed_sensitivity.csv")
     num("imputedCovDiffPp", 100 * (imp.aci90_cov_all - imp.aci90_cov_no_imputed).abs().max(), "{:.1f}")
-    # calibration window ablation (split CQR; W = 30 / 90 / 180)
     cw = pd.read_csv(M / "calibration.csv")
     cw = cw[cw.model.isin(MAIN) & (cw.side == "two") & np.isclose(cw.level, 0.9)]
     for tag, v in (("Thirty", "split_cqr_w30"), ("Ninety", "split_cqr"), ("OneEighty", "split_cqr_w180")):
         num(f"worstHourW{tag}", cw[cw.variant == v].worst_hour_gap_pp.mean(), "{:.1f}")
 
 
+def val_selected(tau=0.95):
+    v = pd.read_csv(RES / "metrics" / "val" / "decisions_reserve.csv")
+    v = v[np.isclose(v.tau, tau) & v.variant.isin(VARS)]
+    return v.loc[v.groupby(["model", "series_id"]).regret.idxmin(), ["model", "series_id", "variant"]]
+
+
 def tab_decisions():
-    t3 = pd.read_csv(T / "T3_decisions.csv")
-    t3["key"] = t3.model.map(LABEL2KEY)
+    tau = 0.95
     r = pd.read_csv(M / "decisions_reserve.csv")
-    r = r[np.isclose(r.tau, 0.95)]
-    nat = r[r.variant == "native"].groupby("model").cost.mean()
-    det = r[r.variant == "deterministic"].groupby("model").cost.mean()
-    sel = t3[t3.key.isin(MAIN)].groupby("key").agg(cost=("cost", "mean"), regret=("regret", "mean"),
-                                                   sf=("shortfall_freq", "mean"), bat=("pct_oracle", "mean"))
-    order = sel.sort_values("cost").index
-    lines = [r"\begin{tabular}{lccccc}", r"\toprule",
-             r"Model & Cal. & Native & Fixed & Short. & Battery \\",
-             r" & cost & cost & rule & (\%) & (\% orc.) \\", r"\midrule"]
+    r = r[np.isclose(r.tau, tau)]
+    sel = val_selected(tau)
+    sel = sel[sel.model.isin(MAIN)]
+    per = sel.merge(r, on=["model", "series_id", "variant"])          # all days of each series
+    cost = per.pivot(index="model", columns="series_id", values="cost").reindex(MAIN)[SERIES]
+    pooled = pd.read_csv(M / "pooled_costs.csv").set_index("model").reindex(MAIN)
+    diffs = pd.read_csv(M / "reserve_diffs.csv")
+    dcost = diffs[(diffs.metric == "cost") & (diffs.comparison == "model")]
+    b = pd.read_csv(T / "T3_decisions.csv")
+    b["key"] = b.model.map(LABEL2KEY)
+    bat = b[b.key.isin(MAIN)].groupby("key").pct_oracle.mean()
+
+    def not_sig_vs(best, m, sid):
+        if m == best:
+            return True
+        d = dcost[(dcost.series_id == sid) & (((dcost.a == best) & (dcost.b == m)) | ((dcost.a == m) & (dcost.b == best)))]
+        return bool(len(d)) and not bool(d.significant.iloc[0])
+
+    order = pooled.sort_values("cost_selected").index
+    lines = [r"\begin{tabular}{l" + "c" * len(SERIES) + "cccc}", r"\toprule",
+             r" & \multicolumn{6}{c}{Reserve cost, validation-selected calibration} & \multicolumn{3}{c}{Mean (common days)} & Battery \\",
+             r"\cmidrule(lr){2-7}\cmidrule(lr){8-10}",
+             "Model & " + " & ".join(SHORT[s] for s in SERIES) + r" & Cal. & Native & Fixed & (\% orc.) \\", r"\midrule"]
     for m in order:
-        s = sel.loc[m]
-        cost = f"{s.cost:.2f}"
+        cells = []
+        for sid in SERIES:
+            best = cost[sid].idxmin()
+            txt = f"{cost.loc[m, sid]:.2f}"
+            if m == best:
+                txt = r"\textbf{" + txt + "}"
+            if not_sig_vs(best, m, sid):
+                txt = r"\underline{" + txt + "}"
+            cells.append(txt)
+        pc = pooled.loc[m]
+        mean_txt = f"{pc.cost_selected:.2f}"
         if m == order[0]:
-            cost = r"\textbf{" + cost + "}"
-        bat = f"{s.bat:.1f}"
-        if s.bat == sel.bat.max():
-            bat = r"\textbf{" + bat + "}"
-        lines.append(f"{NAME[m]} & {cost} & {nat[m]:.2f} & {det[m]:.2f} & {100 * s.sf:.1f} & {bat}" + r" \\")
+            mean_txt = r"\textbf{" + mean_txt + "}"
+        if not_sig_vs(order[0], m, "pooled"):
+            mean_txt = r"\underline{" + mean_txt + "}"
+        bt = f"{bat[m]:.1f}"
+        if bat[m] == bat.max():
+            bt = r"\textbf{" + bt + "}"
+        lines.append(f"{NAME[m]} & " + " & ".join(cells) + f" & {mean_txt} & {pc.cost_native:.2f} & {pc.cost_deterministic:.2f} & {bt}" + r" \\")
     lines += [r"\bottomrule", r"\end{tabular}"]
     (OUT / "tab_decisions.tex").write_text("\n".join(lines) + "\n")
-    num("costBest", sel.cost.min(), "{:.2f}")
-    num("costBestModel", NAME[order[0]], "{}")
-    red = 100 * (1 - sel.cost / det.reindex(sel.index))
-    num("detReductionLo", red.min(), "{:.0f}")
-    num("detReductionHi", red.max(), "{:.0f}")
-    num("batChronos", sel.loc["chronos2", "bat"], "{:.1f}")
-    num("batLgbm", sel.loc["lgbm-s0", "bat"], "{:.1f}")
-    num("batNaive", sel.loc["seasonal_naive", "bat"], "{:.1f}")
-    num("batFmLo", sel.loc[FMS, "bat"].min(), "{:.1f}")
-    num("batFmHi", sel.loc[FMS, "bat"].max(), "{:.1f}")
-    num("batBestModel", NAME[sel.bat.idxmax()], "{}")
-    # operator (load only)
-    op = t3[t3.model == "Operator"]
-    num("opRegretErco", op[op.series_id == "ERCO_load"].regret.iloc[0], "{:.2f}")
-    fm_erco = t3[(t3.series_id == "ERCO_load") & t3.key.isin(MAIN)].regret.min()
-    num("bestRegretErcoLoad", fm_erco, "{:.2f}")
-    opnat = r[(r.model == "operator") & (r.variant == "native")].regret.mean()
-    num("opNativeRegret", opnat, "{:.1f}")
-    # battery variant sensitivity
-    b = pd.read_csv(M / "decisions_battery.csv")
-    b = b[b.model.isin(MAIN) & b.variant.isin(VARS)]
-    spread = b.groupby(["model", "series_id", "variant"]).pct_oracle.max().groupby(["model", "series_id"]).agg(lambda x: x.max() - x.min())
-    num("batVariantSpread", spread.max(), "{:.1f}")
-    # USD illustration, ERCOT wind, best model
-    w = t3[(t3.series_id == "ERCO_wind") & t3.key.isin(MAIN)].sort_values("cost").iloc[0]
-    num("usdErcoWind", w.cost_usd_per_day / 1e6, "{:.1f}")
-    # H3 rank agreement
-    a = pd.read_csv(M / "accuracy.csv")
-    rho = []
-    disagree = []
-    for sid in SERIES:
-        aa = a[(a.series_id == sid) & a.model.isin(MAIN)].set_index("model").nmae.rank()
-        rr = t3[(t3.series_id == sid) & t3.key.isin(MAIN)].set_index("key").cost.rank()
-        cmn = aa.index.intersection(rr.index)
-        rho.append(aa[cmn].corr(rr[cmn], method="spearman"))
-        if aa[cmn].idxmin() != rr[cmn].idxmin():
-            disagree.append(sid)
-    num("rhoLo", min(rho), "{:.2f}")
-    num("rhoHi", max(rho), "{:.2f}")
-    num("nTopDisagree", str(len(disagree)))
-    # paired bootstrap (T7)
-    t7 = pd.read_csv(T / "T7_reserve_cost_differences.csv")
-    mv = t7[t7.comparison.str.contains(" - ") & ~t7.comparison.str.contains(":")]
-    closest = mv.sort_values("mean_diff", ascending=False).iloc[0]
-    num("closestRival", closest.comparison.split(" - ")[1], "{}")
-    num("closestDiff", -closest.mean_diff, "{:.2f}")
-    num("closestLo", -closest.ci_hi, "{:.2f}")
-    num("closestHi", -closest.ci_lo, "{:.2f}")
-    num("nRivalsSig", str(int(mv.significant.sum())))
-    num("nRivals", str(len(mv)))
-    cv = t7[t7.comparison.str.contains("calibrated - native")]
+
+    best = order[0]
+    num("costBestModel", NAME[best], "{}")
+    num("costBest", pooled.loc[best, "cost_selected"], "{:.2f}")
+    num("commonDays", str(int(pooled.n_days.iloc[0])))
+    pdiff = dcost[dcost.series_id == "pooled"]
+
+    def pair(m):
+        d = pdiff[((pdiff.a == best) & (pdiff.b == m)) | ((pdiff.a == m) & (pdiff.b == best))].iloc[0]
+        sgn = -1 if d.a == best else 1   # express as cost(m) - cost(best)
+        lo, hi = sorted((sgn * d.ci_lo, sgn * d.ci_hi))
+        return sgn * d.mean_diff, lo, hi, bool(d.significant)
+    rivals = [m for m in order[1:]]
+    nsig = sum(pair(m)[3] for m in rivals)
+    num("nRivals", str(len(rivals)))
+    num("nRivalsSig", str(nsig))
+    for k, m in (("Second", order[1]), ("Third", order[2])):
+        dm, lo, hi, _ = pair(m)
+        num(f"rival{k}", NAME[m], "{}")
+        num(f"rival{k}Diff", dm, "{:.2f}")
+        num(f"rival{k}Lo", lo, "{:.2f}")
+        num(f"rival{k}Hi", hi, "{:.2f}")
+    cv = diffs[(diffs.comparison == "calibrated_vs_native") & (diffs.series_id == "pooled")]
     num("calNativeLo", -cv.mean_diff.max(), "{:.2f}")
     num("calNativeHi", -cv.mean_diff.min(), "{:.2f}")
     num("calNativeSig", str(int(cv.significant.sum())))
     num("calNativeN", str(len(cv)))
+    red = 100 * (1 - pooled.cost_selected / pooled.cost_deterministic)
+    num("detReductionLo", red.min(), "{:.0f}")
+    num("detReductionHi", red.max(), "{:.0f}")
+    num("batFmLo", bat[FMS].min(), "{:.1f}")
+    num("batFmHi", bat[FMS].max(), "{:.1f}")
+    num("batBestModel", NAME[bat.idxmax()], "{}")
+    num("batLgbm", bat["lgbm-s0"], "{:.1f}")
+    num("batNaive", bat["seasonal_naive"], "{:.1f}")
+    bb = pd.read_csv(M / "decisions_battery.csv")
+    bb = bb[bb.model.isin(MAIN) & bb.variant.isin(VARS)]
+    spread = bb.groupby(["model", "series_id", "variant"]).pct_oracle.max().groupby(["model", "series_id"]).agg(lambda x: x.max() - x.min())
+    num("batVariantSpread", spread.max(), "{:.1f}")
+    op = b[b.model == "Operator"]
+    num("opRegretErco", op[op.series_id == "ERCO_load"].regret.iloc[0], "{:.2f}")
+    num("bestRegretErcoLoad", b[(b.series_id == "ERCO_load") & b.key.isin(MAIN)].regret.min(), "{:.2f}")
+    num("opNativeRegret", r[(r.model == "operator") & (r.variant == "native")].regret.mean(), "{:.1f}")
+    sf = per[per.model.isin(MAIN)].shortfall_freq
+    num("shortfallLo", 100 * sf.min(), "{:.1f}")
+    num("shortfallHi", 100 * sf.max(), "{:.1f}")
+    num("shortfallMean", 100 * sf.mean(), "{:.1f}")
+
+    # H3: rank by nMAE vs by cost vs by pinball loss of the tau* bound (same selected variant)
+    a = pd.read_csv(M / "accuracy.csv")
+    cal = pd.read_csv(M / "calibration.csv")
+    cal = cal[np.isclose(cal.level, tau) & cal.side.isin(["upper", "lower"])]
+    pb = sel.merge(cal, on=["model", "series_id", "variant"])[["model", "series_id", "pinball"]]
+    rho_mae, rho_pin, disagree, disagree_sig = [], [], 0, 0
+    for sid in SERIES:
+        aa = a[(a.series_id == sid) & a.model.isin(MAIN)].set_index("model").nmae.rank()
+        cc = cost[sid].rank()
+        pp = pb[pb.series_id == sid].set_index("model").pinball.reindex(MAIN).rank()
+        rho_mae.append(aa.corr(cc, method="spearman"))
+        rho_pin.append(pp.corr(cc, method="spearman"))
+        if aa.idxmin() != cc.idxmin():
+            disagree += 1
+            if not not_sig_vs(cc.idxmin(), aa.idxmin(), sid):
+                disagree_sig += 1
+    num("rhoLo", min(rho_mae), "{:.2f}")
+    num("rhoHi", max(rho_mae), "{:.2f}")
+    num("rhoPinLo", min(rho_pin), "{:.2f}")
+    num("rhoPinHi", max(rho_pin), "{:.2f}")
+    num("nTopDisagree", str(disagree))
+    num("nTopDisagreeSig", str(disagree_sig))
+    num("seedSdMax", pd.read_csv(M / "seed_spread.csv").regret_sd.max(), "{:.2f}")
+
+
+def tab_checkpoints():
+    import yaml
+    a = yaml.safe_load((ROOT / "configs" / "leakage_audit.yaml").read_text())
+    arxiv = {"chronos2": "2510.15821", "timesfm25": "2310.10688", "moirai2": "2511.11698", "tirex": "2505.23719"}
+    lines = [r"\begin{tabular}{lcc}", r"\toprule", r"Model & Weights committed & Report (arXiv) \\", r"\midrule"]
+    for m in ("tirex", "moirai2", "timesfm25", "chronos2"):
+        lines.append(f"{NAME[m]} & {a['models'][m]['release']} & {arxiv[m]}" + r" \\")
+    lines += [r"\bottomrule", r"\end{tabular}"]
+    (OUT / "tab_checkpoints.tex").write_text("\n".join(lines) + "\n")
 
 
 def ablation():
@@ -261,6 +328,7 @@ def main():
     tab_accuracy()
     tab_calibration()
     tab_decisions()
+    tab_checkpoints()
     ablation()
     data_numbers()
     lines = ["% generated by paper/make_tables.py -- do not edit"]

@@ -39,8 +39,9 @@ def f1_pipeline(out):
 
 
 def f2_coverage_width(cal, out, level=0.9):
+    # the operator's point forecast has no native interval (coverage ~0); it would squash the load axis
     d = cal[(cal["side"] == "two") & np.isclose(cal["level"], level) & cal["model"].map(primary)
-            & ~cal["variant"].str.contains("_w")]
+            & ~cal["variant"].str.contains("_w") & ~((cal["model"] == "operator") & (cal["variant"] == "native"))]
     if d.empty:
         return
     d = d.assign(target=d["series_id"].map(target_of), fam=d["model"].map(family))
