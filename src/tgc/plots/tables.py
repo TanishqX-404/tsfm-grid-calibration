@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 import yaml
 
-from tgc import config
+from tgc import config, splits
 from tgc.plots.style import LABELS, VLABELS, family, primary
 
 log = logging.getLogger("tgc.tables")
@@ -47,7 +47,9 @@ def t1_data(out, phase):
         rows.append({"series": sid, "region": config.load("data")["regions"][region]["name"], "target": target,
                      "first": r["first"][:10], "last": r["last"][:10],
                      "scale_MW": float(df.loc[tr.contains(df["local_time"]), "scale"].mean()),
-                     "dropped_day_share": n_drop / max(n_orig, 1), "imputed_hours": r["imputed_hours"]})
+                     "dropped_day_share": n_drop / max(n_orig, 1), "imputed_hours": r["imputed_hours"],
+                     **{f"{p}_dropped_days": r.get(f"{p}_dropped_days") for p in ("train", "val", "test")},
+                     "test_origins": r.get("test_origins")})
     write(pd.DataFrame(rows), out, "T1_data")
 
 
@@ -76,7 +78,7 @@ def t2_accuracy(acc, dm, out):
     write(d, out, "T2_accuracy")
 
 
-def t3_decisions(res, bat, out, tau, res_sel=None, bat_sel=None):
+def t3_decisions(res, bat, out, tau, res_sel=None, bat_sel=None, seeds=None, period=None):
     """Per model: calibration variant (reserve) and variant + interval level (battery) are
     *selected on validation* (``res_sel``/``bat_sel``) and reported on the evaluated period, so the
     test table carries no post-hoc choice. Also writes the full battery table per level."""
@@ -96,8 +98,14 @@ def t3_decisions(res, bat, out, tau, res_sel=None, bat_sel=None):
     best = chosen.merge(r, on=["model", "series_id", "variant"], how="left")
     det = r[r["variant"] == "deterministic"][["model", "series_id", "regret"]].rename(columns={"regret": "regret_deterministic"})
     best = best.merge(det, on=["model", "series_id"], how="left")
-    best = best[["model", "series_id", "variant", "regret", "regret_ci_lo", "regret_ci_hi", "shortfall_freq",
+    best = best[["model", "series_id", "variant", "cost", "regret", "regret_ci_lo", "regret_ci_hi", "shortfall_freq",
                  "regret_deterministic"]]
+    # illustrative dollars: normalized MWh/day x mean scale (MW) x one stated reserve price
+    usd = config.load("decisions")["reserve"]["illustrative_prices"]["c_R_usd_per_mwh"]
+    best["cost_usd_per_day"] = best["cost"] * best["series_id"].map(_mean_scale) * usd
+    if seeds is not None and not seeds.empty:
+        sd = seeds.rename(columns={"regret_sd": "regret_sd_seeds"})[["family", "series_id", "regret_sd_seeds"]]
+        best = best.assign(family=best["model"].map(family)).merge(sd, on=["family", "series_id"], how="left").drop(columns="family")
     if bat is not None and not bat.empty:
         b_sel = bat_sel[bat_sel["model"].map(primary) & ~bat_sel["variant"].str.contains("_w")]
         bc = pick(b_sel, ["model", "series_id"], "pct_oracle", "max")[["model", "series_id", "variant", "level"]]
@@ -109,6 +117,48 @@ def t3_decisions(res, bat, out, tau, res_sel=None, bat_sel=None):
     best["model"] = best["model"].map(lambda m: LABELS.get(family(m), m))
     best["variant"] = best["variant"].map(lambda v: VLABELS.get(v, v))
     write(best.sort_values(["series_id", "regret"]), out, "T3_decisions")
+
+
+_SCALE = {}
+
+
+def _mean_scale(sid):
+    """Mean normalizer (MW) of a series over the evaluated period, for illustrative dollars."""
+    if sid not in _SCALE:
+        from tgc.data import io
+        df = io.load_series(sid)
+        m = _PERIOD.contains(df["local_time"]) if _PERIOD is not None else slice(None)
+        _SCALE[sid] = float(df.loc[m, "scale"].mean())
+    return _SCALE[sid]
+
+
+_PERIOD = None
+
+
+def t7_reserve_diffs(diffs, out):
+    """Pooled paired-bootstrap differences in daily reserve cost: every model vs the cheapest, and
+    each model's validation-selected calibration vs its native intervals."""
+    if diffs is None or diffs.empty:
+        return
+    p = diffs[(diffs["series_id"] == "pooled") & (diffs["metric"] == "cost")].copy()
+    m = p[p["comparison"] == "model"]
+    means = {}
+    for r in m.itertuples():
+        means.setdefault(r.a, []).append(r.mean_diff)
+        means.setdefault(r.b, []).append(-r.mean_diff)
+    ref = min(means, key=lambda k: np.mean(means[k]))
+    rows = []
+    for r in m.itertuples():
+        if ref in (r.a, r.b):
+            other, sign = (r.b, 1) if r.a == ref else (r.a, -1)
+            lo, hi = sorted((sign * r.ci_lo, sign * r.ci_hi))
+            rows.append({"comparison": f"{LABELS.get(family(ref), ref)} - {LABELS.get(family(other), other)}",
+                         "mean_diff": sign * r.mean_diff, "ci_lo": lo, "ci_hi": hi, "significant": r.significant})
+    for r in p[p["comparison"] == "calibrated_vs_native"].itertuples():
+        mdl = r.a.split(":")[0]
+        rows.append({"comparison": f"{LABELS.get(family(mdl), mdl)}: calibrated - native",
+                     "mean_diff": r.mean_diff, "ci_lo": r.ci_lo, "ci_hi": r.ci_hi, "significant": r.significant})
+    write(pd.DataFrame(rows), out, "T7_reserve_cost_differences")
 
 
 def t4_calibration(cal, out):
@@ -150,8 +200,11 @@ def main(argv=None):
     if acc is not None:
         t2_accuracy(acc, dm, out)
     vdir = config.path(ev["out_dir"]) / "val"  # selections are always made on validation
+    global _PERIOD
+    _PERIOD = splits.get_period(args.phase, allow_test=True)
     t3_decisions(read(mdir / "decisions_reserve.csv"), read(mdir / "decisions_battery.csv"), out, ev["headline_tau"],
-                 read(vdir / "decisions_reserve.csv"), read(vdir / "decisions_battery.csv"))
+                 read(vdir / "decisions_reserve.csv"), read(vdir / "decisions_battery.csv"), read(mdir / "seed_spread.csv"))
+    t7_reserve_diffs(read(mdir / "reserve_diffs.csv"), out)
     cal = read(mdir / "calibration.csv")
     if cal is not None:
         t4_calibration(cal, out)

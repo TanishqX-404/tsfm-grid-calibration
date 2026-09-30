@@ -1,0 +1,16 @@
+comparison,mean_diff,ci_lo,ci_hi,significant
+Chronos-2 - LightGBM,-0.8449,-1.0252,-0.6559,True
+Chronos-2 - Moirai-2.0,-0.0473,-0.1205,0.0762,False
+Chronos-2 - N-HiTS,-0.5033,-0.6881,-0.2731,True
+Chronos-2 - PatchTST,-0.3587,-0.4767,-0.2069,True
+Chronos-2 - Seasonal naive,-2.7398,-3.0012,-2.3353,True
+Chronos-2 - TimesFM-2.5,-0.4378,-0.5476,-0.3089,True
+Chronos-2 - TiRex,-0.2294,-0.3359,-0.1176,True
+Chronos-2: calibrated - native,-0.1859,-0.3569,-0.0681,True
+LightGBM: calibrated - native,-0.1835,-0.4013,-0.0427,True
+Moirai-2.0: calibrated - native,-0.2090,-0.4305,-0.0562,True
+N-HiTS: calibrated - native,-0.9596,-1.2678,-0.7275,True
+PatchTST: calibrated - native,-0.2944,-0.5173,-0.1679,True
+Seasonal naive: calibrated - native,-1.1594,-1.7612,-0.6426,True
+TimesFM-2.5: calibrated - native,-0.4299,-0.6918,-0.2741,True
+TiRex: calibrated - native,-0.1690,-0.3633,-0.0419,True

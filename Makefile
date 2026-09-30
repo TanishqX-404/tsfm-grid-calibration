@@ -39,6 +39,7 @@ decide:
 
 eval:
 	$(PY) -m tgc.evaluate.run --phase $(PHASE) $(ALLOW)
+	$(PY) -m tgc.evaluate.extra --phase $(PHASE) $(ALLOW)
 
 figures:
 	$(PY) -m tgc.plots.figures --phase $(PHASE) $(ALLOW)
