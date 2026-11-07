@@ -25,7 +25,15 @@ We thank both reviewers. All changes fit within the 5-page limit. Some text else
 
 "Series kept native" counts the series on which validation selected the native bound, so no calibration was applied there. At τ\* = 0.95 the average gain is 11.2% (4.2–24.3%). Most of the 0.95 gain therefore comes from reaching a level the native grid lacks, not from correcting a miscalibrated native quantile. Sec. IV (RQ3) now states this.
 
-[If the Chronos-2 native-q0.95 run is included: *With Chronos-2's native q0.95, reserve cost at τ\* = 0.95 is X, against 3.98 with calibration and 4.23 with native q0.9.*]
+*Chronos-2 with its native 0.95 quantile.* The pinned checkpoint was trained on 21 levels (0.01, 0.05, 0.1, …, 0.95, 0.99), so 0.95 is native. We ran it once more on the test period with the same checkpoint and context, requesting 0.05/0.1/0.5/0.9/0.95. Its q0.1/q0.5/q0.9 agree with the main run to within 0.004 normalized units, which is GPU numerics. We then sized reserve at τ\* = 0.95 from the native q0.95 (load) or q0.05 (solar, wind):
+
+| Chronos-2 reserve bound | Cost per day (mean over series) | Shortfall hours |
+|---|---|---|
+| Native q0.95 | 3.97 | 4.8% (1.8–7.2% by series) |
+| Validation-selected calibration | 3.98 | 5.3% (4.5–6.1%) |
+| Native q0.9 | 4.23 | 10.3% |
+
+So, for the TSFM that offers the right level, its native tail quantile is as cheap as the calibrated bound on average. Calibration adds per-series coverage control (the native shortfall ranges from 1.8% on ERCOT solar to 7.2% on ERCOT load). Sec. II and Sec. IV (RQ3) now report this.
 
 **R1.3 — Bootstrap CIs for coverage, and sensitivity to block length.** We added moving-block bootstrap 95% CIs for empirical coverage (2000 resamples) with blocks of 3, 7, 14 and 28 days (Sec. IV, RQ2).
 
