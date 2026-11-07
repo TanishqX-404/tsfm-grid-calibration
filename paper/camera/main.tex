@@ -50,7 +50,7 @@ Foundation models, probabilistic forecasting, conformal prediction, operating re
 \section{Introduction}
 Zero-shot time-series foundation models now match or beat task-specific models on many energy benchmarks \cite{prior_ercot_tsfm,prior_fets,prior_consumer}. Most of those benchmarks report median errors and at most a proper score such as CRPS, but operators use the tails: reserve requirements, battery commitments and risk limits are set from quantiles. An accurate but overconfident model under-procures reserve, and an underconfident one wastes capacity.
 
-Three earlier studies are closest to ours. Achour et al.\ applied split conformal prediction to earlier-generation TSFMs (Lag-Llama, Chronos, TimesFM) on general benchmarks and ERCOT load \cite{prior_conformal_ercot}. Beichter et al.\ fine-tuned one TSFM for one feeder decision \cite{prior_dfl}. Simeone measured interval coverage of Chronos-2 and Moirai-2 on ERCOT load and set reserve margins from Chronos-Bolt quantiles \cite{prior_consumer}; he found Chronos-2 slightly conservative at a nominal 90\% level and Moirai-2 overconfident. To our knowledge, nobody has yet measured calibration and operating cost for four current TSFMs across load, solar and wind, under several conformal methods, with hour-of-day coverage and decision cost reported for every model. Our result for native calibration and Simeone's for Chronos-2 need not conflict. He evaluates a 90\% level with contexts up to 2048\,h on ERCOT load over 2020--2024, while we evaluate the native 80\% band with a 28-day context, averaged over six series, on a test period after the checkpoints were published; Chronos-2's average native coverage here is also close to nominal (0.78), and our tests act on individual series and hours. We did not test which of these differences drives the gap.
+Three earlier studies are closest to ours. Achour et al.\ applied split conformal prediction to earlier-generation TSFMs (Lag-Llama, Chronos, TimesFM) on general benchmarks and ERCOT load \cite{prior_conformal_ercot}. Beichter et al.\ fine-tuned one TSFM for one feeder decision \cite{prior_dfl}. Simeone measured interval coverage of Chronos-2 and Moirai-2 on ERCOT load and set reserve margins from Chronos-Bolt quantiles \cite{prior_consumer}; he found Chronos-2 slightly conservative at a nominal 90\% level and Moirai-2 overconfident. To our knowledge, nobody has yet measured calibration and operating cost for four current TSFMs across load, solar and wind, under several conformal methods, with hour-of-day coverage and decision cost reported for every model. Our native-calibration result need not conflict with Simeone's: he evaluates 90\% intervals with contexts up to 2048\,h on ERCOT load in 2020--2024, we the 80\% band with a 28-day context after checkpoint release; Chronos-2's average coverage here is also near nominal (0.78), and our tests act on single series and hours.
 
 We ask: \textbf{RQ1} how accurate are current zero-shot TSFMs against trained models on history-only day-ahead load, solar and wind? \textbf{RQ2} are their native intervals calibrated, and which conformal method restores nominal coverage with the narrowest intervals as conditions change between winter and summer? \textbf{RQ3} when intervals drive reserve sizing and battery scheduling, which model and calibration pair is cheapest, and does that follow the accuracy ranking? Contributions:
 \begin{enumerate}
@@ -62,19 +62,19 @@ We ask: \textbf{RQ1} how accurate are current zero-shot TSFMs against trained mo
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=\columnwidth]{F1_pipeline.pdf}
+\includegraphics[width=0.9\columnwidth]{F1_pipeline.pdf}
 \caption{Pipeline. Every model writes the same quantile table; calibration and decision code is shared, so cost differences come only from the forecasts.}
 \label{fig:pipeline}
 \end{figure}
 
 \section{Data and Protocol}
-\textbf{Data.} We use hourly EIA-930 demand and solar and wind generation \cite{eia930} for ERCOT and CAISO from the PUDL tables \cite{pudl} (six series). Timestamps are in local standard time, and gaps of up to 3\,h are interpolated. Solar and wind are normalized by a trailing 90-day maximum (a causal capacity proxy) and load by its training mean. Training runs from July 2019 to December 2024, validation from January to October 2025 and test from 1 November 2025 to 31 August 2026 (304 daily origins; September and October are not in the test year). Days whose context or target contains a longer gap are dropped for every model. EIA-930 lacks 5 December 2025 for ERCOT, which removes 30 ERCOT test days.
+\textbf{Data.} We use hourly EIA-930 demand and solar and wind generation \cite{eia930} for ERCOT and CAISO from the PUDL tables \cite{pudl} (six series). Timestamps are in local standard time, and gaps of up to 3\,h are interpolated. Solar and wind are normalized by a trailing 90-day maximum (a causal capacity proxy) and load by its training mean. Training runs from July 2019 to December 2024, validation from January to October 2025 and test from 1 November 2025 to 31 August 2026 (304 daily origins; September and October are not in the test year). Days with longer gaps are dropped for every model. EIA-930 lacks 5 December 2025 for ERCOT, which removes 30 ERCOT test days.
 
-\textbf{Information set.} Forecasts are \emph{history-only}, with no weather or other covariates. The forecast for day $D$ is issued at midnight using the 28 days before $D$ and covers the 24 hours of $D$ (lead times 1--24\,h, so horizon equals hour of day). Market day-ahead forecasts are made about 14\,h earlier, when the ERCOT and CAISO day-ahead markets close on the morning of $D-1$. Our early horizons are therefore close to nowcasts, which flatters every model, and persistence-like ones most. Solar night hours are excluded from accuracy, coverage and width. We define them causally from the data, because CAISO's EIA-930 solar profile drifts by about 1.5\,h between 2022 and 2025. In the reserve problem they carry zero reserve and zero error.
+\textbf{Information set.} Forecasts are \emph{history-only}, with no weather or other covariates. The forecast for day $D$ is issued at midnight using the 28 days before $D$ and covers the 24 hours of $D$ (lead times 1--24\,h, so horizon equals hour of day). Market day-ahead forecasts are made about 14\,h earlier, when the ERCOT and CAISO day-ahead markets close on the morning of $D-1$. Our early horizons are therefore close to nowcasts, which flatters every model, and persistence-like ones most. Solar night hours, defined causally from the data (CAISO's EIA-930 solar profile drifts by about 1.5\,h over 2022--2025), are excluded from accuracy, coverage and width. In the reserve problem they carry zero reserve and zero error.
 
-\textbf{Models.} The TSFMs are Chronos-2 \cite{ansari2025chronos2}, TimesFM-2.5 \cite{das2024timesfm}, Moirai-2.0-R-small \cite{liu2025moirai2} and TiRex \cite{auer2025tirex}, run zero-shot from pinned checkpoints. The baselines are each trained on their own series only: seasonal naive (lag 24\,h for solar and wind, 168\,h for load, with empirical residual quantiles), LightGBM quantile regression \cite{ke2017lightgbm} on 24/48/168-h lags and calendar features (Optuna, 30 trials), and N-HiTS \cite{challu2023nhits} and PatchTST \cite{nie2023patchtst} with a multi-quantile loss (three seeds each). N-HiTS memorized its single training series and its quantiles collapsed on validation, so for load and wind it uses early stopping on the last 90 training days. All models output quantiles $0.1,\dots,0.9$, and the median is the point forecast. We also report the balancing authority's day-ahead load forecast.
+\textbf{Models.} The TSFMs are Chronos-2 \cite{ansari2025chronos2}, TimesFM-2.5 \cite{das2024timesfm}, Moirai-2.0-R-small \cite{liu2025moirai2} and TiRex \cite{auer2025tirex}, run zero-shot from pinned checkpoints. The baselines are each trained on their own series only: seasonal naive (lag 24\,h for solar and wind, 168\,h for load, with empirical residual quantiles), LightGBM quantile regression \cite{ke2017lightgbm} on 24/48/168-h lags and calendar features (Optuna, 30 trials), and N-HiTS \cite{challu2023nhits} and PatchTST \cite{nie2023patchtst} with a multi-quantile loss (three seeds each). N-HiTS memorized its single training series and its quantiles collapsed on validation, so for load and wind it uses early stopping on the last 90 training days. All models output quantiles $0.1,\dots,0.9$, and the median is the point forecast. This common grid is set by TimesFM-2.5 and TiRex, whose heads return only these levels; Chronos-2, which also predicts 0.05 and 0.95, was queried at the same levels. We also report the balancing authority's day-ahead load forecast.
 
-\textbf{Leakage control.} Table~\ref{tab:ckpt} lists when each checkpoint's weights were committed; all precede the test start (Moirai-2.0's weights were published in August 2025, before its technical report). No documented pretraining corpus contains EIA-930 or CAISO data. An ERCOT load set in the Chronos corpus was a held-out benchmark for Chronos \cite{ansari2024chronos}. We cannot rule out its use by Chronos-2 and TiRex, but it predates our test period.
+\textbf{Leakage control.} Table~\ref{tab:ckpt} lists when each checkpoint's weights were committed; all precede the test start. No documented pretraining corpus contains EIA-930 or CAISO data. An older ERCOT load set, a held-out Chronos benchmark \cite{ansari2024chronos}, may have been used by Chronos-2 and TiRex but predates our test period.
 
 \begin{table}[t]
 \caption{Checkpoint dates (weights file at the pinned revision).}
@@ -92,12 +92,12 @@ Chronos-2 & 2025-10-30 & 2510.15821 \\
 \end{tabular}
 \end{table}
 
-\textbf{Protocol.} All settings were chosen on validation, frozen and tagged: the LightGBM hyper-parameters, the calibration step sizes, the fixed-reserve share, and each model's calibration variant and battery interval level in Table~\ref{tab:dec}. The test period was evaluated once. The foundation models reproduced their test forecasts bit-for-bit in a second, independent run.
+\textbf{Protocol.} All settings were chosen on validation, frozen and tagged: the LightGBM hyper-parameters, the calibration step sizes, the fixed-reserve share, and each model's calibration variant and battery interval level in Table~\ref{tab:dec}. The test period was evaluated once. The TSFM test forecasts reproduced bit-for-bit in a second run.
 
 \section{Calibration and Decision Layers}
 \textbf{Calibration.} Conformalized quantile regression (CQR) \cite{romano2019cqr} scores each past day by how far the outcome fell outside the model's interval, $s=\max(\hat q^{lo}-y,\ y-\hat q^{hi})$, and widens (or narrows) the interval by a quantile $Q$ of past scores: $[\hat q^{lo}-Q,\ \hat q^{hi}+Q]$. Each calibrator is fit separately per series and per hour of day and updated daily from days whose outcomes are known. The four variants differ only in how $Q$ is chosen. \emph{Split CQR} takes the empirical quantile of the last $W=90$ days. \emph{NexCP} \cite{barber2023nexcp} weights older days less ($0.99^{\text{age}}$). \emph{ACI} \cite{gibbs2021aci} raises the target miscoverage after each covered day and lowers it after each miss, $\alpha_{t+1}=\alpha_t+\gamma(\alpha-\text{err}_t)$. \emph{QT} is the proportional, quantile-tracking term of conformal PID control \cite{angelopoulos2023pid}: it moves $Q$ itself by a fixed step after each hit or miss. We use neither the integral nor the forecasting term, so QT is not the full PID controller. Energy series are not exchangeable, so the coverage of split CQR and NexCP is empirical. ACI and quantile tracking guarantee long-run average coverage for any sequence (quantile tracking for bounded scores). The native band $[\hat q_{0.1},\hat q_{0.9}]$ is the only native interval the models provide, so we compare native and conformal intervals at the 80\% level and report conformal intervals alone at 90\%. One-sided bounds for the decision layer apply the same method to the nearest native quantile (0.9 or 0.1), so native reserve bounds sit at 0.9 even when the decision needs 0.95.
 
-\textbf{Tests.} The Kupiec test checks whether the share of misses equals the nominal rate \cite{kupiec1995}, and the Christoffersen test checks whether a miss makes the next miss more likely \cite{christoffersen1998}. Kupiec is applied to all hourly misses of a series and assumes independence, which autocorrelated misses violate, so its rejection rates are inflated. Christoffersen is applied to each hour's daily miss sequence (median $p$ over hours).
+\textbf{Tests.} The Kupiec test checks whether the share of misses equals the nominal rate \cite{kupiec1995}, and the Christoffersen test checks whether a miss makes the next miss more likely \cite{christoffersen1998}. Kupiec, applied to all hourly misses of a series, assumes independent misses, so its rejection rates are inflated; we therefore add block-bootstrap CIs. Christoffersen is applied to each hour's daily miss sequence (median $p$ over hours).
 
 \textbf{Reserve sizing.} With reserve cost $c_R$ and shortfall penalty $c_S$, the expected-cost-optimal upward reserve is the $\tau^*=1-c_R/c_S$ quantile of the forecast error (newsvendor). Reserve $R_h$ is the calibrated one-sided bound at $\tau^*$ minus the median (upper bound for load, lower for solar and wind). Daily cost is $J=\sum_h [c_R R_h + c_S (e_h-R_h)^+]$, with error $e_h$ in the reserve direction, in normalized units. Whenever the bound lies beyond the median,
 \begin{equation}
@@ -109,7 +109,7 @@ where $\rho_\tau$ is the pinball loss. Reserve cost is therefore the quantile lo
 \textbf{Battery firming.} A solar or wind plant of capacity 1 with a 0.5/1.0 battery (90\% round-trip) commits a day-ahead schedule by a linear program on the calibrated lower bound under a stated two-level time-of-use price. A greedy real-time rule covers deviations; shortfalls pay three times the price and surplus sells at half. Profit is reported as a share of an oracle that plans on the true outcome.
 
 \section{Results}
-\textbf{RQ1: accuracy.} Table~\ref{tab:acc} gives test nMAE. Chronos-2, Moirai-2.0 and TiRex have the lowest nMAE on load and wind, but the margin over the best trained baseline is small, especially on wind. On ERCOT wind Chronos-2 reaches 0.121 against 0.172 for LightGBM and 0.204 for seasonal naive, which is 30\% lower than LightGBM (17\% on CAISO wind). The fairer comparison is PatchTST, the strongest trained model on both wind series: Chronos-2 is 7\% lower on ERCOT wind (0.121 vs.\ 0.130) and 2\% lower on CAISO wind (0.111 vs.\ 0.113). The pinball-loss tests in Table~\ref{tab:acc} (Diebold--Mariano with Harvey correction \cite{diebold1995dm,harvey1997hln}, Holm-adjusted, 5\%) are made against the best model in each column. By that test the best trained baseline is significantly worse on ERCOT load, CAISO load and ERCOT wind, and statistically tied with the best model on CAISO wind. Chronos-2 beats LightGBM significantly on 4 of six series, while only 2 of 18 comparisons among the three leading TSFMs are significant. On solar, lagged LightGBM is as accurate as the TSFMs (CAISO: 0.067 vs.\ 0.070). ERCOT's own day-ahead load forecast, which uses weather, remains the most accurate (0.024 vs.\ 0.035). The CAISO operator row is not comparable, because EIA-930 CAISO demand has diverged from CAISO's forecast definition since 2022.
+\textbf{RQ1: accuracy.} Table~\ref{tab:acc} gives test nMAE. Chronos-2, Moirai-2.0 and TiRex have the lowest nMAE on load and wind, but the margin over the best trained baseline is small, especially on wind. On ERCOT wind Chronos-2 reaches 0.121 against 0.172 for LightGBM and 0.204 for seasonal naive, which is 30\% lower than LightGBM (17\% on CAISO wind), though most of this margin comes from the first hours (Section~\ref{sec:disc}). The fairer comparison is PatchTST, the strongest trained model on both wind series: Chronos-2 is 7\% lower on ERCOT wind (0.121 vs.\ 0.130) and 2\% lower on CAISO wind (0.111 vs.\ 0.113). The pinball-loss tests in Table~\ref{tab:acc} (Diebold--Mariano with Harvey correction \cite{diebold1995dm,harvey1997hln}, Holm-adjusted, 5\%) are made against the best model in each column. By that test the best trained baseline is significantly worse on ERCOT load, CAISO load and ERCOT wind, and statistically tied with the best model on CAISO wind. Chronos-2 beats LightGBM significantly on 4 of six series; only 2 of 18 comparisons among the three leading TSFMs are significant. On solar, lagged LightGBM is as accurate as the TSFMs (CAISO: 0.067 vs.\ 0.070). ERCOT's own day-ahead load forecast, which uses weather, remains the most accurate (0.024 vs.\ 0.035). The CAISO operator row is not comparable, because EIA-930 CAISO demand has diverged from CAISO's forecast definition since 2022.
 
 \begin{table}[t]
 \caption{Test nMAE (normalized MAE of the median; solar daytime only) and mean native 80\% coverage. Bold: lowest per series (ties at three decimals are both bold); underlined: pinball loss not significantly worse than the best (DM, Holm, 5\%). The operator forecast is a point forecast with no native interval.}
@@ -133,7 +133,7 @@ Operator (BA) & 0.024 & -- & -- & 0.096 & -- & -- & -- \\
 \end{tabular}}
 \end{table}
 
-\textbf{RQ2: calibration.} Table~\ref{tab:cal} pools eight models and six series. Averages hide the problem: the native 80\% band covers 0.784 on average, and PatchTST and TiRex are close to nominal. But 71\% of model-series pairs under-cover, only 15\% pass the Kupiec test, and the worst hour of the day misses by 14.7 points on average (up to 43). At the same 80\% level, conformal intervals cover 0.801--0.807 and are only 6\% wider. They score slightly better on the interval (Winkler) score (0.397--0.404 vs.\ 0.408) and cut the worst-hour gap to 8.6--9.3 points. At 90\% they cover 0.900--0.906 on average (0.87--0.93 over series). The four methods differ little (width within 2\%) and we did not test them formally; the adaptive ones mainly reduce miss clustering. We recommend the simplest, split CQR with a 30--90-day window, since a shorter window gives better hour-of-day coverage (worst-hour gap 4.2, 5.9 and 7.4 points for $W=30,90,180$ days at 90\%). ACI capped its interval on 0.9\% of test days, and removing EIA-imputed hours changes coverage by at most 0.3 points.
+\textbf{RQ2: calibration.} Table~\ref{tab:cal} pools eight models and six series. Averages hide the problem: the native 80\% band covers 0.784 on average, and PatchTST and TiRex are close to nominal. But 71\% of model-series pairs under-cover, only 15\% pass the Kupiec test, and the worst hour of the day misses by 14.7 points on average (up to 43). At the same 80\% level, conformal intervals cover 0.801--0.807 and are only 6\% wider. They score slightly better on the interval (Winkler) score (0.397--0.404 vs.\ 0.408) and cut the worst-hour gap to 8.6--9.3 points. At 90\% they cover 0.900--0.906 on average (0.87--0.93 over series). The four methods differ little (width within 2\%); the adaptive ones mainly reduce miss clustering. We recommend the simplest, split CQR with a 30--90-day window, since a shorter window gives better hour-of-day coverage (worst-hour gap 4.2, 5.9 and 7.4 points for $W=30,90,180$ days at 90\%). With moving-block bootstrap 95\% CIs (blocks of 3--28 days), the pooled native 80\% CI excludes 0.80 at every block length (0.770--0.792 to 0.763--0.799), while every pooled conformal CI contains its nominal level. Per pair, the native CI contains 0.80 in 54--67\% of pairs (94--100\% for conformal), so Kupiec overstates native failure. ACI capped its interval on 0.9\% of test days, and removing EIA-imputed hours changes coverage by at most 0.3 points.
 
 \begin{table}[t]
 \caption{Calibration pooled over eight models and six series (test). IS: interval (Winkler) score; Worst hr: mean largest hour-of-day coverage gap from nominal; Kup./Chr.: share of model-series pairs passing the Kupiec and Christoffersen tests at 5\%. QT: quantile tracking (proportional term of conformal PID control only).}
@@ -167,10 +167,10 @@ QT & 0.900 & 0.88--0.92 & 0.370 & 0.475 & 7.3 & 60 & 90 \\
 \label{fig:covwidth}
 \end{figure*}
 
-\textbf{RQ3: decision value.} Table~\ref{tab:dec} reports reserve cost at $\tau^*=0.95$ per series. The mean columns average over the 274 days on which all six series have forecasts, the same days the paired bootstrap uses. Calibration lowers reserve cost for all 8 models, by 0.19--1.48 normalized units per day (paired moving-block bootstrap \cite{kunsch1989}, 7-day blocks, 95\% intervals excluding zero). Part of this gain comes from reaching the 0.95 level that native quantiles cannot. Calibrated intervals are 27--38\% cheaper than the fixed-percentage rule. Chronos-2 has the lowest mean cost (4.03). TiRex costs 0.12 more per day (95\% CI $-$0.01 to 0.26, not significant) and Moirai-2.0 costs 0.18 more (CI 0.08--0.28); 6 of 7 differences are significant. Shortfall occurs in 5.1\% of hours on average, close to the 5\% implied by $\tau^*$. For ERCOT load the operator's point forecast with conformal intervals is cheaper than any model (regret 1.11 vs.\ 1.99); without calibration it cannot size reserve at all (regret 23.2). In battery firming (Fig.~\ref{fig:battery}) the TSFMs recover 81.9--82.7\% of oracle profit (best: Moirai-2.0), against 80.4\% for LightGBM and 76.7\% for seasonal naive. The calibration variant changes profit by at most 1.8 points, much less than the commitment level does.
+\textbf{RQ3: decision value.} Table~\ref{tab:dec} reports reserve cost at $\tau^*=0.95$ per series. The mean columns average over the 274 days on which all six series have forecasts, the same days the paired bootstrap uses. Calibration lowers reserve cost for all 8 models, by 0.19--1.48 normalized units per day (paired moving-block bootstrap \cite{kunsch1989}, 7-day blocks, 95\% intervals excluding zero). Most of this gain comes from reaching the 0.95 level: at $\tau^*=0.90$, where native $\hat q_{0.9}$ exists, calibration lowers cost by only 1.7\% on average (0--7.9\% per model), against 11.2\% at 0.95. Calibrated intervals are 27--38\% cheaper than the fixed-percentage rule. Chronos-2 has the lowest mean cost (4.03). TiRex costs 0.12 more per day (95\% CI $-$0.01 to 0.26, not significant) and Moirai-2.0 costs 0.18 more (CI 0.08--0.28); 6 of 7 differences are significant. Shortfall occurs in 5.1\% of hours on average, close to the 5\% implied by $\tau^*$. For ERCOT load the operator's point forecast with conformal intervals is cheaper than any model (regret 1.11 vs.\ 1.99); without calibration it cannot size reserve at all (regret 23.2). In battery firming (Fig.~\ref{fig:battery}) the TSFMs recover 81.9--82.7\% of oracle profit (best: Moirai-2.0), against 80.4\% for LightGBM and 76.7\% for seasonal naive. The calibration variant changes profit by at most 1.8 points, much less than the commitment level does.
 
 \begin{table*}[t]
-\caption{Test reserve cost at $\tau^*=0.95$ (normalized units per day) with each model's validation-selected calibration, per series (all days of each series), and mean over the 274 common days with calibrated intervals, native intervals and the fixed rule. The mean columns use the common days only, so they are not the average of the per-series columns. Battery: profit as \% of oracle (solar and wind; higher is better). Bold: lowest reserve cost, or highest battery profit. Underlined: not significantly different from the best (paired block bootstrap, 95\%).}
+\caption{Test reserve cost at $\tau^*=0.95$ (normalized units per day). Per series: validation-selected calibration, all days of the series. Mean: the 274 common days (not the average of the per-series columns), with calibrated, native and fixed-rule reserve. Battery: profit as \% of oracle (solar and wind). Bold: best; underlined: not significantly different from the best (paired block bootstrap, 95\%).}
 \label{tab:dec}
 \centering\footnotesize\setlength{\tabcolsep}{4pt}
 \begin{tabular}{lcccccccccc}
@@ -198,7 +198,7 @@ Seasonal naive & 6.93 & 3.58 & 10.65 & 4.67 & 3.46 & 9.56 & 6.58 & 7.82 & 9.55 &
 \label{fig:battery}
 \end{figure}
 
-\textbf{Accuracy vs.\ cost.} Equation~(\ref{eq:decomp}) makes the link between cost and quantile loss close to an identity: reserve cost is the pinball loss of the $\tau^*$ bound plus a bias term, so a model's cost rank mostly follows its quantile-loss rank at $\tau^*$, and only indirectly its median error. Across series the Spearman correlation between cost rank and nMAE rank is 0.45--1.00, and between cost rank and the pinball loss of the $\tau^*$ bound it is 0.69--1.00 (Fig.~\ref{fig:rank}). The model with the lowest nMAE is not the cheapest on 3 of six series, or on 4 if Moirai-2.0 is taken as the winner of the ERCOT solar tie at 0.095. The cost gap is significant in at most one of them, ERCOT solar, and only under that tie-break. With eight models the rank correlations are imprecise, so we claim only that nMAE is an unreliable proxy for operating cost.
+\textbf{Accuracy vs.\ cost.} Equation~(\ref{eq:decomp}) makes the link between cost and quantile loss close to an identity: reserve cost is the pinball loss of the $\tau^*$ bound plus a bias term, so a model's cost rank mostly follows its quantile-loss rank at $\tau^*$, and only indirectly its median error. Across series the Spearman correlation between cost rank and nMAE rank is 0.45--1.00, and between cost rank and the pinball loss of the $\tau^*$ bound it is 0.69--1.00 (Fig.~\ref{fig:rank}). The lowest-nMAE model is not the cheapest on 3 of six series (4 if Moirai-2.0 wins the ERCOT solar tie), but the cost gap is significant only under that tie-break. With eight models the rank correlations are imprecise, so we claim only that nMAE is an unreliable proxy for operating cost.
 
 \begin{figure}[t]
 \centering
@@ -207,13 +207,13 @@ Seasonal naive & 6.93 & 3.58 & 10.65 & 4.67 & 3.46 & 9.56 & 6.58 & 7.82 & 9.55 &
 \label{fig:rank}
 \end{figure}
 
-\textbf{Ablations.} Shortening the TSFM context from 28 to 7 days raises nMAE from 0.077 to 0.081 and reserve cost from 4.13 to 4.48. A 90-day context gives 0.076 and 7\% narrower calibrated intervals at unchanged cost (4.13; common days only). The seed spread of the trained baselines is small (regret s.d.\ $\le$\,0.28).
+\textbf{Ablations.} A 7-day TSFM context instead of 28 days raises nMAE from 0.077 to 0.081 and reserve cost from 4.13 to 4.48; a 90-day context gives 0.076 and 7\% narrower calibrated intervals at equal cost. Baseline seed spread is small (regret s.d.\ $\le$\,0.28).
 
-\section{Discussion and Limitations}
-From history alone, zero-shot TSFMs have the lowest point error on load and wind among the models we tested, but their quantiles should not be used as reserve requirements as delivered. A per-hour conformal layer of a few hundred lines of NumPy, running in seconds on a CPU, fixes average coverage and lowers reserve cost for every model, and it helps most for the worst-calibrated ones. Limitations: forecasts are history-only and issued at midnight rather than at market close, so they understate the lead time and omit the weather forecasts operators rely on, especially for solar and wind. The fixed-percentage rule is a weak reference, and empirical-residual and operator-style dynamic reserve baselines remain to be added. Prices are stated, not market prices. Results cover two balancing authorities and ten months. Baselines are single-series models, and N-HiTS uses target-specific training settings. The capacity proxy is a trailing maximum. The CAISO demand definition in EIA-930 limits the operator comparison to ERCOT.
+\section{Discussion and Limitations}\label{sec:disc}
+From history alone, zero-shot TSFMs have the lowest point error on load and wind among the models we tested, but their quantiles should not be used as reserve requirements as delivered. A per-hour conformal layer that runs in seconds on a CPU fixes average coverage and lowers reserve cost for every model, most for the worst-calibrated ones. \textbf{Protocol bias.} LightGBM and seasonal naive use lags $\ge$24\,h, while the neural models see the context up to midnight, which favours them at short lead times. Over the six series the best TSFM's nMAE is 57\% below LightGBM's for hours 1--6 but 4.3\% below for hours 13--24, the lead times nearest a market forecast (ERCOT wind: 7.9\%); against the best trained model, 12.7\% and 1.7\%. A TSFM still leads at hours 13--24 on five of six series. The RQ1 margins are thus upper bounds for a market-close issue; calibration, fit per hour, is unaffected. Limitations: TSFMs are used zero-shot; fine-tuning (supported by Chronos-2) may change accuracy and calibration. Forecasts are history-only and issued at midnight rather than at market close, so they understate the lead time and omit the weather forecasts operators rely on, especially for solar and wind. The fixed-percentage rule is a weak reference, and empirical-residual and operator-style dynamic reserve baselines remain to be added. Prices are stated, not market prices; results cover two balancing authorities and ten months; baselines are single-series models. The CAISO demand definition in EIA-930 limits the operator comparison to ERCOT.
 
 \section{Conclusion}
-Across six ERCOT and CAISO series, current foundation models have the lowest history-only day-ahead point error on load and wind, though the margin over the best trained baseline is small on wind. Their quantiles are rarely calibrated as delivered. Conformal calibration is cheap, restores nominal coverage on average at equal levels with little extra width, and lowers reserve cost for every model. Chronos-2 and TiRex gave the lowest reserve cost. As Eq.~(\ref{eq:decomp}) implies, the cost ranking follows the quantile loss at the operating level and differs from the nMAE ranking on some series.
+Current foundation models have the lowest history-only point error on load and wind, with a small margin on wind that shrinks at longer lead times, but their quantiles are rarely calibrated as delivered. Conformal calibration is cheap, restores nominal coverage with little extra width and lowers reserve cost for every model; Chronos-2 and TiRex were cheapest. As Eq.~(\ref{eq:decomp}) implies, cost ranks follow the quantile loss at the operating level, not nMAE.
 
 % Generated by IEEEtran.bst, version: 1.14 (2015/08/26)
 \begin{thebibliography}{10}
@@ -244,7 +244,7 @@ M.~E. Za'ter and B.-M. Hodge, ``Empirical assessment of time-series foundation
   arXiv:2604.22077}, 2026.
 
 \bibitem{prior_fets}
-M.~Obermeier, M.~Pruckner, F.~Haselbeck, and A.~Zeiselmair, ``{FETS}
+M.~Obermeier \emph{et~al.}, ``{FETS}
   benchmark: Foundation models enable scalable and generalizable energy time
   series forecasting,'' \emph{arXiv preprint arXiv:2604.22328}, 2026.
 
@@ -259,8 +259,7 @@ S.~Achour, Y.~Bouher, D.~Nguyen, and N.~Chesneau, ``Foundation models for time
   preprint arXiv:2507.08858}, 2025.
 
 \bibitem{prior_dfl}
-M.~Beichter, N.~Friederich, J.~Pinter, D.~Werling, K.~Phipps, S.~Beichter,
-  O.~Neumann, R.~Mikut, V.~Hagenmeyer, and B.~Heidrich, ``Decision-focused
+M.~Beichter \emph{et~al.}, ``Decision-focused
   fine-tuning of time series foundation models for dispatchable feeder
   optimization,'' \emph{arXiv preprint arXiv:2503.01936}, 2025.
 
@@ -269,8 +268,7 @@ M.~Beichter, N.~Friederich, J.~Pinter, D.~Werling, K.~Phipps, S.~Beichter,
   EIA-930}),'' \url{https://www.eia.gov/electricity/gridmonitor/}, 2026.
 
 \bibitem{pudl}
-{Catalyst Cooperative}, ``{PUDL}: The public utility data liberation project,
-  {EIA-930} tables,'' \url{https://docs.catalyst.coop/pudl/}, 2026, nightly
+{Catalyst Cooperative}, ``{PUDL} {EIA-930} tables,'' \url{https://docs.catalyst.coop/pudl/}, 2026, nightly
   build of 2026-09-28.
 
 \bibitem{ansari2025chronos2}
@@ -280,26 +278,25 @@ A.~F. Ansari \emph{et~al.}, ``{Chronos-2}: From univariate to universal
 \bibitem{das2024timesfm}
 A.~Das, W.~Kong, R.~Sen, and Y.~Zhou, ``A decoder-only foundation model for
   time-series forecasting,'' in \emph{Proc. Int. Conf. Machine Learning
-  (ICML)}, 2024, arXiv:2310.10688.
+  (ICML)}, 2024.
 
 \bibitem{liu2025moirai2}
 C.~Liu \emph{et~al.}, ``{Moirai 2.0}: When less is more for time series
   forecasting,'' \emph{arXiv preprint arXiv:2511.11698}, 2025.
 
 \bibitem{auer2025tirex}
-A.~Auer, P.~Podest, D.~Klotz, S.~B{\"o}ck, G.~Klambauer, and S.~Hochreiter,
+A.~Auer \emph{et~al.},
   ``{TiRex}: Zero-shot forecasting across long and short horizons with
   enhanced in-context learning,'' in \emph{Advances in Neural Information
-  Processing Systems (NeurIPS)}, 2025, arXiv:2505.23719.
+  Processing Systems (NeurIPS)}, 2025.
 
 \bibitem{ke2017lightgbm}
-G.~Ke, Q.~Meng, T.~Finley, T.~Wang, W.~Chen, W.~Ma, Q.~Ye, and T.-Y. Liu,
+G.~Ke \emph{et~al.},
   ``{LightGBM}: A highly efficient gradient boosting decision tree,'' in
   \emph{Advances in Neural Information Processing Systems (NeurIPS)}, 2017.
 
 \bibitem{challu2023nhits}
-C.~Challu, K.~G. Olivares, B.~N. Oreshkin, F.~Garza~Ramirez,
-  M.~Mergenthaler~Canseco, and A.~Dubrawski, ``{N-HiTS}: Neural hierarchical
+C.~Challu \emph{et~al.}, ``{N-HiTS}: Neural hierarchical
   interpolation for time series forecasting,'' in \emph{Proc. AAAI Conf.
   Artificial Intelligence}, 2023.
 
@@ -310,8 +307,7 @@ Y.~Nie, N.~H. Nguyen, P.~Sinthong, and J.~Kalagnanam, ``A time series is worth
 
 \bibitem{ansari2024chronos}
 A.~F. Ansari \emph{et~al.}, ``Chronos: Learning the language of time
-  series,'' \emph{Transactions on Machine Learning Research}, 2024,
-  arXiv:2403.07815.
+  series,'' \emph{Trans. Machine Learning Research}, 2024.
 
 \bibitem{romano2019cqr}
 Y.~Romano, E.~Patterson, and E.~J. Cand{\`e}s, ``Conformalized quantile
