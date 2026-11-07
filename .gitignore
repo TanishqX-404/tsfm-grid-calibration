@@ -15,3 +15,6 @@ paper/*.log
 paper/*.bbl
 paper/*.blg
 paper/*.out
+paper/camera/*.aux
+paper/camera/*.log
+paper/camera/*.out
